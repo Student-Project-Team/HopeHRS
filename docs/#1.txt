@@ -1,0 +1,31 @@
+STANDUP MEETING
+Date: April 5, 2026
+
+Agendas:
+Checked member’s progress
+Checked PRs for database.
+
+Maria Antonette Espinosa - Project Manager
+Did last week: Set up repository,, branches, scaffold, Supabase client, and environment, 
+Doing this week: Routing and placeholder images, coordination with the members, and reviewing pull requests 
+Blockers: None
+
+Danica Lacandula - UI/UX Developer
+Did last week: Clone and set up locally, Login and Register pages
+Doing this week: AppShell and callback page
+Blockers: Project manager’s pull requests #1, #2, #3, and #4
+
+Alyssa Bernadette Tuliao - Database Engineer
+Did last week: Created Supabase project, Add record_status and stamp columns, rights tables and seeding
+Doing this week: Migration of files and ERD
+Blockers: Pull request #1
+
+Jherico Sabile - Rights and Authentication Specialist
+Did last week: Auth context, email auth, Google OAuth
+Doing this week: Login Guard and provision trigger
+Blockers: Pull requests by project manager, UI/UX developer, and database engineer.
+
+Venice Marizene Linga - QA and Documentation Specialist
+Did last week: Reviewing of PRs, Test setup and documentation
+Doing this week: Sprint log and README
+Blockers: Pull requests by other four members.
