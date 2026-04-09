@@ -29,3 +29,5 @@ Venice Marizene Linga - QA and Documentation Specialist
 Did last week: Reviewing of PRs, Test setup and documentation
 Doing this week: Sprint log and README
 Blockers: Pull requests by other four members.
+
+<img src="docs/04.05.2026.png" alt="Meeting notes" width="500">
