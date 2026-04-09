@@ -34,4 +34,4 @@ Venice Marizene Linga - QA and Documentation Specialist
 
 ---
 
-![Standup Meeting Notes - April 5, 2026](04.05.2026.png)
+![Meeting notes](./04.05.2026.png)
