@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 
 const AuthContext = createContext({});
@@ -7,39 +7,8 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      // Force loading screen to disappear after 3.5 seconds if DB hangs
-      const backupTimer = setTimeout(() => setLoading(false), 3500);
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          await fetchProfile(session.user);
-        }
-      } catch (err) {
-        console.error("Auth init error:", err);
-      } finally {
-        setLoading(false);
-        clearTimeout(backupTimer);
-      }
-    };
-
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        await fetchProfile(session.user);
-      } else {
-        setCurrentUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = async (authUser) => {
+  // Wrap fetchProfile in useCallback so it's stable
+  const fetchProfile = useCallback(async (authUser) => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -52,17 +21,38 @@ export const AuthProvider = ({ children }) => {
       if (profile && profile.record_status === 'ACTIVE') {
         setCurrentUser({ ...authUser, ...profile });
       } else {
-        // If they exist but are INACTIVE, log them out
         await supabase.auth.signOut();
         setCurrentUser(null);
-        alert("Access Denied: Account is INACTIVE. Please contact HR.");
+        alert("Access Denied: Account is INACTIVE.");
       }
     } catch (err) {
       console.error("Fetch profile error:", err);
+      setCurrentUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Backup timer to prevent infinite loading
+    const backupTimer = setTimeout(() => setLoading(false), 3500);
+
+    // Using onAuthStateChange handles the initial session check AND future changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        await fetchProfile(session.user);
+      } else {
+        setCurrentUser(null);
+        setLoading(false);
+      }
+      clearTimeout(backupTimer); // Clear once we have a definitive answer
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(backupTimer);
+    };
+  }, [fetchProfile]);
 
   return (
     <AuthContext.Provider value={{ currentUser, loading }}>
