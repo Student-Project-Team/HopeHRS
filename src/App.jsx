@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'  // adjust path if needed
 import Login from './pages/Login'
 import Register from './pages/Register'
 import AuthCallback from './pages/AuthCallback'
@@ -14,23 +15,25 @@ import DeletedItems from './pages/DeletedItems'
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Protected dashboard routes */}
-        <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route path="employees" element={<Employees />} />
-          <Route path="job-history" element={<JobHistory />} />
-          <Route path="jobs" element={<Jobs />} />
-          <Route path="departments" element={<Departments />} />
-          <Route path="admin" element={<Admin />} />
-          <Route path="deleted" element={<DeletedItems />} />
-          <Route index element={<Navigate to="employees" replace />} />
-        </Route>
-      </Routes>
+          {/* Protected dashboard routes */}
+          <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route path="employees" element={<Employees />} />
+            <Route path="job-history" element={<JobHistory />} />
+            <Route path="jobs" element={<Jobs />} />
+            <Route path="departments" element={<Departments />} />
+            <Route path="admin" element={<Admin />} />
+            <Route path="deleted" element={<DeletedItems />} />
+            <Route index element={<Navigate to="employees" replace />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'  // adjust path if needed
 
 const NAV_ITEMS = [
   { icon: '👥', label: 'Employees',     path: 'employees' },
@@ -21,14 +22,16 @@ const MODULE_CARDS = [
 
 export default function AppLayout() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
+  const { currentUser, logout, loading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeNav, setActiveNav] = useState('Employees')
 
   useEffect(() => {
-    const raw = localStorage.getItem('hr_current_user')
-    if (!raw) { navigate('/login'); return }
-    setUser(JSON.parse(raw))
+    if (loading) return
+    if (!currentUser) {
+      navigate('/login')
+      return
+    }
 
     const isMobile = window.innerWidth <= 768
     if (isMobile) setSidebarOpen(false)
@@ -46,7 +49,7 @@ export default function AppLayout() {
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [navigate])
+  }, [navigate, currentUser, loading])
 
   function toggleSidebar() {
     setSidebarOpen(prev => {
@@ -56,12 +59,24 @@ export default function AppLayout() {
     })
   }
 
-  function logout() {
-    localStorage.removeItem('hr_current_user')
+  async function handleLogout() {
+    await logout()
     navigate('/login')
   }
 
-  const displayName = user?.name || user?.email || ''
+  const displayName =
+    currentUser?.user_metadata?.first_name ||
+    currentUser?.user_metadata?.name ||
+    currentUser?.email ||
+    ''
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <span className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -82,7 +97,7 @@ export default function AppLayout() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600 hidden sm:block">{displayName}</span>
-          <button onClick={logout}
+          <button onClick={handleLogout}
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 border border-gray-200 hover:border-red-200 px-3 py-1.5 rounded-lg transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -130,7 +145,6 @@ export default function AppLayout() {
             ))}
           </div>
 
-          {/* Child routes render here */}
           <Outlet />
         </main>
 

@@ -18,12 +18,11 @@ export function AuthProvider({ children }) {
     isCheckingRef.current = true
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('user')
         .select('record_status')
         .eq('id', user.id)
         .single()
 
-      // Only sign out if we definitely know the status is NOT 'ACTIVE'
       const isExplicitlyInactive = !error && data && data.record_status !== 'ACTIVE'
 
       if (isExplicitlyInactive) {
@@ -33,12 +32,10 @@ export function AuthProvider({ children }) {
         setAuthError('Your account is inactive. Please contact support.')
         isSigningOutRef.current = false
       } else {
-        // No row, error, or status is ACTIVE – allow access
         console.log('Account status OK or unknown, keeping signed in')
       }
     } catch (err) {
       console.error('Error checking user status:', err)
-      // Do NOT sign out on error – assume active to avoid lockouts
     } finally {
       isCheckingRef.current = false
     }
@@ -74,20 +71,24 @@ export function AuthProvider({ children }) {
       setSession(initialSession)
       setCurrentUser(initialSession?.user ?? null)
       setLoading(false)
+
+      if (initialSession?.user) {
+        checkUserStatusAndSignOut(initialSession.user)
+      }
     }).catch((err) => {
       console.error('Error getting session:', err)
       if (isMounted) setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!isMounted) return
 
         setSession(session)
         setCurrentUser(session?.user ?? null)
 
         if (event === 'SIGNED_IN' && session?.user) {
-          await checkUserStatusAndSignOut(session.user)
+          checkUserStatusAndSignOut(session.user)
         }
 
         if (event === 'SIGNED_OUT') {
