@@ -13,6 +13,15 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return children
+
+const ProtectedRoute = ({ children }) => {
+    const isAuthenticated = false
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />
+    }
+
+    return children
 }
 
 export default ProtectedRoute
