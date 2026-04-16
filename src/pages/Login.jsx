@@ -1,65 +1,57 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { signIn } from '../services/authService';
+import { supabase } from '../supabaseClient';
 
 export default function Login() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  function handleLogin(e) {
-    e.preventDefault()
-    setError('')
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    if (!email || !password) {
-      setError('Email and password required.')
-      return
+    const { data, error: signInError } = await signIn(email, password);
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+      return;
     }
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Valid email required.')
-      return
+
+    // Login guard: check if user is ACTIVE in the "user" table
+    const { data: userData, error: userError } = await supabase
+      .from('user')
+      .select('record_status')
+      .eq('userId', data.user.id)
+      .single();
+
+    if (userError || userData?.record_status !== 'ACTIVE') {
+      await supabase.auth.signOut();
+      setError('Your account is inactive. Please contact an administrator.');
+      setLoading(false);
+      return;
     }
 
-    setLoading(true)
-
-    setTimeout(() => {
-      const mockUsers = JSON.parse(localStorage.getItem('hr_mock_users')) || []
-      const user = mockUsers.find(u => u.email === email)
-
-      if (!user || user.password !== password) {
-        setError('Invalid email or password.')
-        setLoading(false)
-        return
-      }
-
-      localStorage.setItem('hr_current_user', JSON.stringify({
-        email: user.email,
-        name: `${user.firstName || email.split('@')[0]} ${user.lastName || ''}`.trim(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-      }))
-
-      navigate('/app')
-    }, 300)
-  }
+    navigate('/employees');
+  };
 
   function handleGoogleLogin() {
-    navigate('/callback')
+    navigate('/callback');
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
-
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">Sign in</h1>
           <p className="text-gray-500 text-sm">Access your HR dashboard</p>
         </div>
 
-        <form onSubmit={handleLogin} noValidate>
-          {/* Email */}
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
             <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700 mb-1.5">
               Email address
@@ -71,10 +63,10 @@ export default function Login() {
               onChange={e => setEmail(e.target.value)}
               placeholder="you@company.com"
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              required
             />
           </div>
 
-          {/* Password */}
           <div className="mb-4">
             <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
               Password
@@ -86,15 +78,12 @@ export default function Login() {
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••"
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              required
             />
           </div>
 
-          {/* Error */}
-          {error && (
-            <p className="text-red-500 text-xs mb-4">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -111,14 +100,12 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Divider */}
         <div className="flex items-center gap-3 my-5">
           <hr className="flex-1 border-gray-100" />
           <span className="text-xs text-gray-400">or continue with</span>
           <hr className="flex-1 border-gray-100" />
         </div>
 
-        {/* Google */}
         <button
           onClick={handleGoogleLogin}
           className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
@@ -132,15 +119,13 @@ export default function Login() {
           Sign in with Google
         </button>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-600 hover:underline font-medium">
             Create account
           </Link>
         </p>
-
       </div>
     </div>
-  )
+  );
 }
