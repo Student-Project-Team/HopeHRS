@@ -13,6 +13,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // ✅ Add validation for empty fields
+    if (!email.trim() || !password.trim()) {
+      setError('All fields are required.');
+      return;
+    }
+
     setLoading(true);
 
     const { data, error: signInError } = await signIn(email, password);
