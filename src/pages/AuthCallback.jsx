@@ -7,47 +7,27 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session) {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
         navigate('/login?error=oauth_failed');
         return;
       }
 
-      const userId = session.user.id;
-      const userEmail = session.user.email;
-      const fullName = session.user.user_metadata?.full_name || '';
-
-      // Insert into your custom users table – only columns that exist
-      const { error: upsertError } = await supabase
+      // ✅ Login guard: check record_status from the users table
+      const { data: userData, error: userError } = await supabase
         .from('users')
-        .upsert({
-          id: userId,
-          email: userEmail,
-          full_name: fullName,
-          user_type: 'USER',
-          record_status: 'ACTIVE'
-        }, { onConflict: 'id' });
+        .select('record_status')
+        .eq('id', session.user.id)
+        .maybeSingle();
 
-      if (upsertError) {
-        console.error('Upsert error:', upsertError);
-        navigate(`/login?error=${encodeURIComponent(upsertError.message)}`);
+      // If no row found or record_status is not 'ACTIVE', reject login
+      if (userError || !userData || userData.record_status !== 'ACTIVE') {
+        await supabase.auth.signOut();
+        navigate('/login?error=inactive');
         return;
       }
 
-      // Verify record_status
-      const { data: userCheck } = await supabase
-        .from('users')
-        .select('record_status')
-        .eq('id', userId)
-        .single();
-
-      if (!userCheck || userCheck.record_status !== 'ACTIVE') {
-        await supabase
-          .from('users')
-          .update({ record_status: 'ACTIVE' })
-          .eq('id', userId);
-      }
-
+      // Active user – proceed to dashboard
       navigate('/app');
     };
 
