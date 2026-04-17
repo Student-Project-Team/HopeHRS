@@ -22,21 +22,21 @@ export default function Login() {
       return;
     }
 
-    // Login guard: check if user is ACTIVE in the "user" table
+    // ✅ Fixed: use 'users' table, column 'id', and data.user.id
     const { data: userData, error: userError } = await supabase
-      .from('user')
+      .from('users')
       .select('record_status')
-      .eq('userId', data.user.id)
-      .single();
+      .eq('id', data.user.id)
+      .maybeSingle();
 
-    if (userError || userData?.record_status !== 'ACTIVE') {
+    if (userError || !userData || userData.record_status !== 'ACTIVE') {
       await supabase.auth.signOut();
       setError('Your account is inactive. Please contact an administrator.');
       setLoading(false);
       return;
     }
 
-    navigate('/employees');
+    navigate('/App');
   };
 
   function handleGoogleLogin() {
