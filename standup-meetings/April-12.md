@@ -8,8 +8,8 @@
 - Linga, Venice Marizene (QA Specialist)
 
 **Agendas:**
-- Checked the member's progress and completion of tasks
-- Each member reported the tasks they completed
+- Checked the members' progress and completion of tasks
+- Each member reported the tasks they completed for the week
 - Played a short game hosted by the Project Manager
 
 ---
