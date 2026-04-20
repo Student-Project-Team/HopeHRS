@@ -44,4 +44,4 @@
 
 ---
 
-![Meeting notes](standup-meetings/04.12.2026.jpg)
+![Meeting notes](04.12.2026.jpg)
