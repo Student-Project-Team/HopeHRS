@@ -1,6 +1,13 @@
 ## STANDUP MEETING
 **Date:** April 5, 2026
 
+**Attendees:**
+- Espinosa, Maria Antonette (Project Manager)
+- Lacandula, Danica (UI/UX Developer)
+- Tuliao, Alyssa Bernadette (Database Engineer)
+- Sabile, Jherico (Rights Specialist)
+- Linga, Venice Marizene (QA Specialist)
+
 **Agendas:**
 - Checked member's progress
 - Checked PRs for database
