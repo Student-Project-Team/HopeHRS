@@ -1,6 +1,13 @@
 ## STANDUP MEETING
 **Date:** April 8, 2026
 
+**Attendees:**
+- Espinosa, Maria Antonette (Project Manager)
+- Lacandula, Danica (UI/UX Developer)
+- Tuliao, Alyssa Bernadette (Database Engineer)
+- Sabile, Jherico (Rights Specialist)
+- Linga, Venice Marizene (QA Specialist)
+
 **Agendas:**
 - Checks members’ progress and completion for Sprint 1.
 - Deadline of the sprint 1.
@@ -39,4 +46,4 @@
 
 ---
 
-![Meeting notes](standup-meetings/04.08.2026.png)
+![Meeting notes](04.08.2026.png)
