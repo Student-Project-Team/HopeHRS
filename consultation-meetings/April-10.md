@@ -18,4 +18,4 @@
 
 ---
 
-![Meeting notes](04.10.2026.png)
+![Meeting notes](04.10.2026.jpg)
