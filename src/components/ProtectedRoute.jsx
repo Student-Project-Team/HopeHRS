@@ -1,13 +1,21 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';  // ← Changed import
 
-const ProtectedRoute = ({ children }) => {
-    const isAuthenticated = false
+export default function ProtectedRoute() {
+  const { user, loading } = useAuth();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />
-    }
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="ml-2 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
-    return children
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 }
-
-export default ProtectedRoute

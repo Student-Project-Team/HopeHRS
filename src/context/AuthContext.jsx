@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -9,19 +9,53 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const getUserData = async (authUser) => {
+      if (!authUser) return null;
+      
+      console.log('Looking up user by email:', authUser.email);
+      
+      // Query the 'user' table by email
+      const { data: userData, error } = await supabase
+        .from('user')
+        .select('user_type, record_status')
+        .eq('email', authUser.email)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching user data:', error);
+        return authUser;
+      }
+      
+      console.log('User data from DB:', userData);
+      
+      return {
+        ...authUser,
+        user_type: userData?.user_type,
+        record_status: userData?.record_status
+      };
+    };
+
+    // Initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const userWithData = await getUserData(session?.user);
+      setUser(userWithData);
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const userWithData = await getUserData(session?.user);
+      setUser(userWithData);
       setLoading(false);
     });
 
-    return () => listener?.subscription.unsubscribe();
+    return () => {
+      if (listener?.subscription) {
+        listener.subscription.unsubscribe();
+      }
+    };
   }, []);
 
   return (
@@ -30,5 +64,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(AuthContext);
