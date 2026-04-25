@@ -1,65 +1,48 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const getUserData = async (authUser) => {
-      if (!authUser) return null;
-      
-      console.log('Looking up user by email:', authUser.email);
-      
-      // Query the 'user' table by email
-      const { data: userData, error } = await supabase
-        .from('user')
-        .select('user_type, record_status')
-        .eq('email', authUser.email)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching user data:', error);
-        return authUser;
-      }
-      
-      console.log('User data from DB:', userData);
-      
-      return {
-        ...authUser,
-        user_type: userData?.user_type,
-        record_status: userData?.record_status
-      };
-    };
-
-    // Initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      const userWithData = await getUserData(session?.user);
-      setUser(userWithData);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      const userWithData = await getUserData(session?.user);
-      setUser(userWithData);
-      setLoading(false);
-    });
-
-    return () => {
-      if (listener?.subscription) {
-        listener.subscription.unsubscribe();
+    console.log('1. AuthProvider mounted');
+    
+    const getUser = async () => {
+      console.log('2. getUser started');
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        console.log('3. Session result:', data?.session?.user?.email);
+        
+        if (error) {
+          console.log('4. Session error:', error);
+        }
+        
+        if (data?.session?.user) {
+          console.log('5. User found, setting user');
+          setUser(data.session.user);
+        } else {
+          console.log('5. No user found');
+          setUser(null);
+        }
+      } catch (error) {
+        console.log('6. Error:', error);
+        setUser(null);
+      } finally {
+        console.log('7. Setting loading to false');
+        setLoading(false);
       }
     };
+
+    getUser();
   }, []);
 
+  console.log('Rendering AuthProvider - loading:', loading, 'user:', user?.email);
+
   return (
-    <AuthContext.Provider value={{ user, session, loading }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
