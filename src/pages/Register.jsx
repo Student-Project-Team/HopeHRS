@@ -1,3 +1,61 @@
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+
+export default function Register() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', username: '', email: '', password: '', confirmPassword: ''
+  })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  function handleChange(e) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  function handleRegister(e) {
+    e.preventDefault()
+    setError('')
+
+    const { firstName, lastName, username, email, password, confirmPassword } = form
+
+    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+      setError('All fields required.'); return
+    }
+    if (firstName.length < 2)  { setError('First name min 2 chars.'); return }
+    if (lastName.length < 2)   { setError('Last name min 2 chars.'); return }
+    if (username.length < 3)   { setError('Username min 3 chars.'); return }
+    if (!email.includes('@') || !email.includes('.')) { setError('Valid email required.'); return }
+    if (password.length < 6)   { setError('Password min 6 characters.'); return }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return }
+
+    setLoading(true)
+
+    setTimeout(() => {
+      const mockUsers = JSON.parse(localStorage.getItem('hr_mock_users')) || []
+
+      if (mockUsers.find(u => u.email === email)) {
+        setError('Email already exists.'); setLoading(false); return
+      }
+      if (mockUsers.find(u => u.username === username)) {
+        setError('Username taken.'); setLoading(false); return
+      }
+
+      mockUsers.push({ firstName, lastName, username, email, password })
+      localStorage.setItem('hr_mock_users', JSON.stringify(mockUsers))
+      localStorage.setItem('hr_current_user', JSON.stringify({
+        email,
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+      }))
+
+      navigate('/app')
+    }, 300)
+  }
+
+  function handleGoogleRegister() {
+    navigate('/callback')
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signUp, signInWithGoogle } from '../services/authService';
@@ -64,6 +122,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
+
         <h1 className="text-2xl font-semibold text-gray-900 mb-1">Create account</h1>
         <p className="text-gray-500 text-sm mb-6">Join the HR platform</p>
 
@@ -104,6 +163,7 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleRegister} noValidate>
+
           {/* First + Last name */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
@@ -200,6 +260,12 @@ export default function Register() {
             />
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="text-red-500 text-xs mb-4">{error}</p>
+          )}
+
+          {/* Submit */}
           {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
           <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg">
@@ -220,12 +286,14 @@ export default function Register() {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="flex items-center gap-3 my-5">
           <hr className="flex-1 border-gray-100" />
           <span className="text-xs text-gray-400">or continue with</span>
           <hr className="flex-1 border-gray-100" />
         </div>
 
+        {/* Google */}
         <button onClick={handleGoogleRegister} className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg flex items-center justify-center gap-2">
         <button
           onClick={handleGoogleRegister}
@@ -240,6 +308,9 @@ export default function Register() {
           Register with Google
         </button>
 
+        {/* Footer */}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Already have an account?{' '}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{' '}
           <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
@@ -247,6 +318,11 @@ export default function Register() {
             Sign in
           </Link>
         </p>
+
+      </div>
+    </div>
+  )
+}
       </div>
     </div>
   );
