@@ -1,86 +1,112 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-export default function AuthCallback() {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const mockUsers = JSON.parse(localStorage.getItem('hr_mock_users')) || []
-
-    const googleUser = {
-      email:     'you@company.com',
-      firstName: 'Google',
-      lastName:  'User',
-      username:  'google_user',
-    }
-
-    // Upsert mock Google user
-    if (!mockUsers.find(u => u.email === googleUser.email)) {
-      mockUsers.push({ ...googleUser, password: 'google_oauth' })
-      localStorage.setItem('hr_mock_users', JSON.stringify(mockUsers))
-    }
-
-    // Save session
-    localStorage.setItem('hr_current_user', JSON.stringify({
-      email:     googleUser.email,
-      name:      `${googleUser.firstName} ${googleUser.lastName}`,
-      firstName: googleUser.firstName,
-      lastName:  googleUser.lastName,
-    }))
-
-    // Simulate OAuth delay then redirect
-    const timer = setTimeout(() => navigate('/app'), 1500)
-    return () => clearTimeout(timer)
-  }, [navigate])
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-      <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-      <h2 className="text-lg font-semibold text-gray-800">Completing sign in...</h2>
-      <p className="text-sm text-gray-500">Establishing secure session with Google</p>
-    </div>
-  )
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const handleCallback = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
-        navigate('/login?error=oauth_failed');
-        return;
+      try {
+        // Get the session after OAuth redirect
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          setError('Failed to get session');
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+        
+        if (!session) {
+          console.error('No session found');
+          setError('No session found');
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+
+        console.log('Google login successful! Email:', session.user.email);
+
+        // Check if user exists in your user table by email
+        const { data: userData, error: userError } = await supabase
+          .from('user')
+          .select('user_type, record_status')
+          .eq('email', session.user.email)
+          .maybeSingle();
+
+        console.log('User data from DB:', userData);
+
+        if (userError) {
+          console.error('Database error:', userError);
+          setError('Database error');
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+
+        if (!userData) {
+          console.error('User not found in user table for email:', session.user.email);
+          setError('User not authorized. Please contact administrator.');
+          await supabase.auth.signOut();
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+
+        if (userData.record_status !== 'ACTIVE') {
+          console.error('User account is inactive');
+          setError('Your account is pending activation.');
+          await supabase.auth.signOut();
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+
+        // Success! Redirect to employees page
+        console.log('SUPERADMIN login successful! Redirecting...');
+        navigate('/employees');
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setError('Authentication failed');
+        setTimeout(() => navigate('/login'), 3000);
       }
-
-      // ✅ Login guard: check record_status from the users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('record_status')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      // If no row found or record_status is not 'ACTIVE', reject login
-      if (userError || !userData || userData.record_status !== 'ACTIVE') {
-        await supabase.auth.signOut();
-        navigate('/login?error=inactive');
-        return;
-      }
-
-      // Active user – proceed to dashboard
-      navigate('/app');
     };
 
     handleCallback();
   }, [navigate]);
 
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <h2 style={{ color: 'red' }}>Authentication Error</h2>
+        <p>{error}</p>
+        <p>Redirecting to login...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Completing sign in...</p>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      height: '100vh' 
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #ccc',
+          borderTop: '4px solid #3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto'
+        }}></div>
+        <p style={{ marginTop: '16px', color: '#666' }}>Completing Google sign in...</p>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     </div>
   );

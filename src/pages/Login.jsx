@@ -1,56 +1,6 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-
-export default function Login() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  function handleLogin(e) {
-    e.preventDefault()
-    setError('')
-
-    if (!email || !password) {
-      setError('Email and password required.')
-      return
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Valid email required.')
-      return
-    }
-
-    setLoading(true)
-
-    setTimeout(() => {
-      const mockUsers = JSON.parse(localStorage.getItem('hr_mock_users')) || []
-      const user = mockUsers.find(u => u.email === email)
-
-      if (!user || user.password !== password) {
-        setError('Invalid email or password.')
-        setLoading(false)
-        return
-      }
-
-      localStorage.setItem('hr_current_user', JSON.stringify({
-        email: user.email,
-        name: `${user.firstName || email.split('@')[0]} ${user.lastName || ''}`.trim(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-      }))
-
-      navigate('/app')
-    }, 300)
-  }
-
-  function handleGoogleLogin() {
-    navigate('/callback')
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signIn, signInWithGoogle } from '../services/authService';
-import { signIn } from '../services/authService';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -63,106 +13,122 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    // ✅ Add validation for empty fields
     if (!email.trim() || !password.trim()) {
       setError('All fields are required.');
-    // ✅ Validate fields before calling Supabase
-    if (!email.trim() || !password.trim()) {
-      setError('All fields are required.');   // changed from "missing email or phone"
       return;
     }
 
     setLoading(true);
 
-    const { data, error: signInError } = await signIn(email, password);
-    if (signInError) {
-      setError(signInError.message);
+    try {
+      // Sign in with Supabase
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (signInError) throw signInError;
+
+      console.log('Signed in user:', data.user.email);
+
+      // Check if user exists in your user table
+      const { data: userData, error: userError } = await supabase
+        .from('user')
+        .select('record_status, user_type')
+        .eq('email', data.user.email)
+        .maybeSingle();
+
+      console.log('User data from DB:', userData);
+
+      if (userError) {
+        console.error('User fetch error:', userError);
+        setError('Database error. Please contact administrator.');
+        setLoading(false);
+        return;
+      }
+
+      if (!userData) {
+        console.error('User not found in user table');
+        setError('User not authorized. Please contact administrator.');
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+
+      if (userData.record_status !== 'ACTIVE') {
+        console.error('User account is inactive');
+        setError('Your account is pending activation by an HR administrator.');
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+
+      // Success! Redirect to employees page
+      console.log('Login successful! Redirecting to /employees...');
+      navigate('/employees');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Login failed');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Login guard: check record_status
-    // Login guard: check record_status in users table
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('record_status')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (userError || !userData || userData.record_status !== 'ACTIVE') {
-      await supabase.auth.signOut();
-      setError('Your account is inactive. Please contact an administrator.');
-      setLoading(false);
-      return;
-    }
-
-    navigate('/app');
   };
 
-  async function handleGoogleLogin() {
-    await signInWithGoogle();
-  function handleGoogleLogin() {
-    navigate('/callback');
-  }
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/callback`
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
-
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">Sign in</h1>
           <p className="text-gray-500 text-sm">Access your HR dashboard</p>
         </div>
 
-        <form onSubmit={handleLogin} noValidate>
-          {/* Email */}
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
-            <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Email address
             </label>
             <input
-              id="loginEmail"
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
-            <input
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            />
-          </div>
-
-          {/* Password */}
-          <div className="mb-4">
-            <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Password
-            </label>
-            <input
-              id="loginPassword"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm"
               required
             />
           </div>
+
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Password
+            </label>
             <input
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••"
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              required
             />
           </div>
 
-          {/* Error */}
           {error && (
             <p className="text-red-500 text-xs mb-4">{error}</p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -179,35 +145,15 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Divider */}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm"
-              required
-            />
-          </div>
-          {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg"
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg"
-          >
-            {loading ? 'Signing in...' : 'Sign in →'}
-          </button>
-        </form>
-
         <div className="flex items-center gap-3 my-5">
           <hr className="flex-1 border-gray-100" />
           <span className="text-xs text-gray-400">or continue with</span>
           <hr className="flex-1 border-gray-100" />
         </div>
 
-        {/* Google */}
         <button
           onClick={handleGoogleLogin}
           className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
-        <button
-          onClick={handleGoogleLogin}
-          className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -218,20 +164,11 @@ export default function Login() {
           Sign in with Google
         </button>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-600 hover:underline font-medium">
             Create account
           </Link>
-        </p>
-
-      </div>
-    </div>
-  )
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">Create account</Link>
         </p>
       </div>
     </div>
