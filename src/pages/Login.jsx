@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { signIn, signInWithGoogle } from '../services/authService';
 import { signIn } from '../services/authService';
 import { supabase } from '../supabaseClient';
 
@@ -14,6 +15,9 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
+    // ✅ Add validation for empty fields
+    if (!email.trim() || !password.trim()) {
+      setError('All fields are required.');
     // ✅ Validate fields before calling Supabase
     if (!email.trim() || !password.trim()) {
       setError('All fields are required.');   // changed from "missing email or phone"
@@ -29,6 +33,7 @@ export default function Login() {
       return;
     }
 
+    // Login guard: check record_status
     // Login guard: check record_status in users table
     const { data: userData, error: userError } = await supabase
       .from('users')
@@ -46,6 +51,8 @@ export default function Login() {
     navigate('/app');
   };
 
+  async function handleGoogleLogin() {
+    await signInWithGoogle();
   function handleGoogleLogin() {
     navigate('/callback');
   }
@@ -85,6 +92,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg"
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg"
           >
             {loading ? 'Signing in...' : 'Sign in →'}
@@ -112,9 +120,7 @@ export default function Login() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline font-medium">
-            Create account
-          </Link>
+          <Link to="/register" className="text-blue-600 hover:underline">Create account</Link>
         </p>
       </div>
     </div>
