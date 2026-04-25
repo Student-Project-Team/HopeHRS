@@ -24,3 +24,4 @@ export async function signInWithGoogle() {
   });
   return { error };
 }
+}

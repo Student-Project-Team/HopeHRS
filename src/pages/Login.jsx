@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signIn, signInWithGoogle } from '../services/authService';
+import { signIn } from '../services/authService';
 import { supabase } from '../supabaseClient';
 
 export default function Login() {
@@ -17,6 +18,9 @@ export default function Login() {
     // ✅ Add validation for empty fields
     if (!email.trim() || !password.trim()) {
       setError('All fields are required.');
+    // ✅ Validate fields before calling Supabase
+    if (!email.trim() || !password.trim()) {
+      setError('All fields are required.');   // changed from "missing email or phone"
       return;
     }
 
@@ -30,6 +34,7 @@ export default function Login() {
     }
 
     // Login guard: check record_status
+    // Login guard: check record_status in users table
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('record_status')
@@ -48,6 +53,8 @@ export default function Login() {
 
   async function handleGoogleLogin() {
     await signInWithGoogle();
+  function handleGoogleLogin() {
+    navigate('/callback');
   }
 
   return (
@@ -86,6 +93,7 @@ export default function Login() {
             type="submit"
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg"
           >
             {loading ? 'Signing in...' : 'Sign in →'}
           </button>
