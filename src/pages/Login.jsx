@@ -46,6 +46,63 @@ export default function Login() {
 
   function handleGoogleLogin() {
     navigate('/callback')
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { signIn, signInWithGoogle } from '../services/authService';
+import { signIn } from '../services/authService';
+import { supabase } from '../supabaseClient';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    // ✅ Add validation for empty fields
+    if (!email.trim() || !password.trim()) {
+      setError('All fields are required.');
+    // ✅ Validate fields before calling Supabase
+    if (!email.trim() || !password.trim()) {
+      setError('All fields are required.');   // changed from "missing email or phone"
+      return;
+    }
+
+    setLoading(true);
+
+    const { data, error: signInError } = await signIn(email, password);
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+      return;
+    }
+
+    // Login guard: check record_status
+    // Login guard: check record_status in users table
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('record_status')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (userError || !userData || userData.record_status !== 'ACTIVE') {
+      await supabase.auth.signOut();
+      setError('Your account is inactive. Please contact an administrator.');
+      setLoading(false);
+      return;
+    }
+
+    navigate('/app');
+  };
+
+  async function handleGoogleLogin() {
+    await signInWithGoogle();
+  function handleGoogleLogin() {
+    navigate('/callback');
   }
 
   return (
@@ -66,6 +123,10 @@ export default function Login() {
             </label>
             <input
               id="loginEmail"
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+            <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -81,6 +142,13 @@ export default function Login() {
             </label>
             <input
               id="loginPassword"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+            <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -112,6 +180,21 @@ export default function Login() {
         </form>
 
         {/* Divider */}
+              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm"
+              required
+            />
+          </div>
+          {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2.5 rounded-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg"
+          >
+            {loading ? 'Signing in...' : 'Sign in →'}
+          </button>
+        </form>
+
         <div className="flex items-center gap-3 my-5">
           <hr className="flex-1 border-gray-100" />
           <span className="text-xs text-gray-400">or continue with</span>
@@ -122,6 +205,9 @@ export default function Login() {
         <button
           onClick={handleGoogleLogin}
           className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -143,4 +229,11 @@ export default function Login() {
       </div>
     </div>
   )
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline">Create account</Link>
+        </p>
+      </div>
+    </div>
+  );
 }
