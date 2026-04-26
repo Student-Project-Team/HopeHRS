@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export const AuthContext = createContext();
@@ -12,9 +13,6 @@ export function AuthProvider({ children }) {
     const getUserData = async (authUser) => {
       if (!authUser) return null;
       
-      console.log('Looking up user by email:', authUser.email);
-      
-      // Query the 'user' table by email
       const { data: userData, error } = await supabase
         .from('user')
         .select('user_type, record_status')
@@ -26,8 +24,6 @@ export function AuthProvider({ children }) {
         return authUser;
       }
       
-      console.log('User data from DB:', userData);
-      
       return {
         ...authUser,
         user_type: userData?.user_type,
@@ -35,7 +31,6 @@ export function AuthProvider({ children }) {
       };
     };
 
-    // Initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       const userWithData = await getUserData(session?.user);
@@ -43,7 +38,6 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       const userWithData = await getUserData(session?.user);
