@@ -154,38 +154,65 @@ INSERT INTO jobHistory VALUES('00061','SA1', '2011-01-05', 36000,'BR2');
 INSERT INTO jobHistory VALUES('00063','SA2', '2011-01-05', 38000,'BR2');
 INSERT INTO jobHistory VALUES('00063','SPVR', '2011-06-01', 40000,'BR2');
 
-select * from jobHistory;
+
 
 -- ============================================
 -- Add record_status and stamp to existing tables
 -- ============================================
 
--- Add to employee (modify existing columns to match spec)
-ALTER TABLE employee 
-DROP COLUMN IF EXISTS record_status,
-DROP COLUMN IF EXISTS stamp,
-ADD COLUMN record_status VARCHAR(10) DEFAULT 'ACTIVE',
-ADD COLUMN stamp VARCHAR(60);
 
--- Add to job
-ALTER TABLE job 
-DROP COLUMN IF EXISTS record_status,
-DROP COLUMN IF EXISTS stamp,
-ADD COLUMN record_status VARCHAR(10) DEFAULT 'ACTIVE',
-ADD COLUMN stamp VARCHAR(60);
 
--- Add to department
-ALTER TABLE department 
-DROP COLUMN IF EXISTS record_status,
-DROP COLUMN IF EXISTS stamp,
-ADD COLUMN record_status VARCHAR(10) DEFAULT 'ACTIVE',
-ADD COLUMN stamp VARCHAR(60);
 
--- Add to jobHistory
-ALTER TABLE jobHistory 
-DROP COLUMN IF EXISTS record_status,
-DROP COLUMN IF EXISTS stamp,
-ADD COLUMN record_status VARCHAR(10) DEFAULT 'ACTIVE',
-ADD COLUMN stamp VARCHAR(60);
+
+CREATE TABLE employee (
+    empno VARCHAR(5) PRIMARY KEY,
+    lastname VARCHAR(15) NOT NULL,
+    firstname VARCHAR(15) NOT NULL,
+    gender CHAR(1) CHECK (gender IN ('M', 'F')),
+    birthdate DATE,
+    hiredate DATE,
+    sepDate DATE NULL,
+    record_status VARCHAR(10) DEFAULT 'ACTIVE',
+    stamp VARCHAR(60)
+);
+
+
+
+CREATE TABLE jobHistory (
+    empNo VARCHAR(5),
+    jobCode VARCHAR(4),
+    effDate DATE,
+    salary DECIMAL(10,2) CHECK (salary >= 0),
+    deptCode VARCHAR(3), -- Corrected to match department table
+    record_status VARCHAR(10) DEFAULT 'ACTIVE',
+    stamp VARCHAR(60),
+    
+    
+    PRIMARY KEY (empNo, jobCode, effDate),
+    
+    
+    CONSTRAINT fk_emp FOREIGN KEY (empNo) REFERENCES employee(empno),
+    CONSTRAINT fk_job FOREIGN KEY (jobCode) REFERENCES job(jobCode),
+    CONSTRAINT fk_dept FOREIGN KEY (deptCode) REFERENCES department(deptCode)
+);
+
+
+
+CREATE TABLE job (
+    jobCode VARCHAR(4) PRIMARY KEY,
+    jobDesc VARCHAR(20) NOT NULL,
+    record_status VARCHAR(10) DEFAULT 'ACTIVE',
+    stamp VARCHAR(60)
+);
+
+
+
+CREATE TABLE department (
+    deptCode VARCHAR(3) PRIMARY KEY,
+    deptName VARCHAR(20) NOT NULL,
+    record_status VARCHAR(10) DEFAULT 'ACTIVE',
+    stamp VARCHAR(60)
+);
+
 
  								
