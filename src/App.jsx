@@ -12,7 +12,6 @@ import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
 
-// Placeholder pages
 const JobHistory = () => <div className="p-6">Job History Page</div>;
 const Admin = () => <div className="p-6">Admin Page</div>;
 const DeletedItems = () => <div className="p-6">Deleted Items Page (ADMIN/SUPERADMIN only)</div>;
@@ -28,7 +27,6 @@ function App() {
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              {/* Changed: root now redirects to login instead of employees */}
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/employees" element={<EmployeeListPage />} />
               <Route path="/employees/:empno" element={<EmployeeDetailPage />} />

@@ -6,54 +6,61 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start as false - NO loading
 
   useEffect(() => {
-    const getUserData = async (authUser) => {
-      if (!authUser) return null;
-      
-      const { data: userData, error } = await supabase
-        .from('user')
-        .select('user_type, record_status')
-        .eq('email', authUser.email)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching user data:', error);
-        return authUser;
+    const getUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const { data: userData } = await supabase
+            .from('user')
+            .select('user_type, record_status')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          setUser({
+            ...session.user,
+            user_type: userData?.user_type,
+            record_status: userData?.record_status
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
+        setUser(null);
       }
-      
-      return {
-        ...authUser,
-        user_type: userData?.user_type,
-        record_status: userData?.record_status
-      };
     };
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      const userWithData = await getUserData(session?.user);
-      setUser(userWithData);
-      setLoading(false);
-    });
+    getUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      const userWithData = await getUserData(session?.user);
-      setUser(userWithData);
-      setLoading(false);
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from('user')
+          .select('user_type, record_status')
+          .eq('email', session.user.email)
+          .maybeSingle();
+        
+        setUser({
+          ...session.user,
+          user_type: userData?.user_type,
+          record_status: userData?.record_status
+        });
+      } else {
+        setUser(null);
+      }
     });
 
     return () => {
-      if (listener?.subscription) {
-        listener.subscription.unsubscribe();
-      }
+      listener?.subscription.unsubscribe();
     };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading }}>
+    <AuthContext.Provider value={{ user, loading: false }}>
       {children}
     </AuthContext.Provider>
   );
