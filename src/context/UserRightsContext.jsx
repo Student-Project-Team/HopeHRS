@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, useState, useRef } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -8,8 +8,7 @@ export const UserRightsContext = createContext();
 export function UserRightsProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
   const [rights, setRights] = useState({});
-  const [loading, setLoading] = useState(true); // ADDED: proper loading state
-  const hasFetched = useRef(false);
+  const [loading, setLoading] = useState(true);
 
   const allRights = [
     'EMP_VIEW', 'EMP_ADD', 'EMP_EDIT', 'EMP_DEL',
@@ -29,17 +28,14 @@ export function UserRightsProvider({ children }) {
 
   useEffect(() => {
     const fetchUserRights = async () => {
-      if (hasFetched.current) {
-        setLoading(false); // ADDED
-        return;
-      }
       if (!user?.id) {
-        setLoading(false); // ADDED
+        setRights({});
+        setLoading(false);
         return;
       }
 
       try {
-        setLoading(true); // ADDED
+        setLoading(true);
         const { data: rightsData, error: rightsError } = await supabase
           .from('UserModule_Rights')
           .select('right_id, is_allowed')
@@ -56,26 +52,22 @@ export function UserRightsProvider({ children }) {
         });
 
         setRights(rightsMap);
-        hasFetched.current = true;
       } catch (error) {
         console.error('Error fetching user rights:', error);
       } finally {
-        setLoading(false); // ADDED
+        setLoading(false);
       }
     };
 
-    if (!authLoading && user?.id) {
+    if (!authLoading) {
       fetchUserRights();
-    } else if (!authLoading && !user?.id) {
-      setLoading(false); // ADDED - handle no user case
     }
-  }, [user, authLoading]);
+  }, [user?.id, authLoading]);
 
   const hasRight = (rightCode) => {
     return rights[rightCode] === true;
   };
 
-  // CHANGED: return actual loading state instead of hardcoded false
   return (
     <UserRightsContext.Provider value={{ rights, loading, hasRight, allRights }}>
       {children}
