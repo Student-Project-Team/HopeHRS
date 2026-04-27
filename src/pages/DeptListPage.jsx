@@ -28,7 +28,6 @@ export default function DeptListPage() {
         setLoading(false);
       }
     };
-
     fetchDepartments();
   }, [userType]);
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';  // Removed useCallback
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getAllJobs, createJob, updateJob, softDeleteJob, recoverJob } from '../services/jobService';
@@ -24,12 +24,10 @@ export default function JobListPage() {
         setError(null);
       } catch (err) {
         setError(err.message);
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchJobs();
   }, [userType]);
 
@@ -77,7 +75,6 @@ export default function JobListPage() {
         )}
       </div>
 
-      {/* Table JSX - same as before */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
           <thead className="bg-gray-50">
@@ -117,12 +114,7 @@ export default function JobListPage() {
         </table>
       </div>
 
-      <AddJobModal 
-        isOpen={showModal} 
-        onClose={() => { setShowModal(false); setEditingJob(null); }} 
-        onSave={handleSave} 
-        editingJob={editingJob} 
-      />
+      <AddJobModal isOpen={showModal} onClose={() => { setShowModal(false); setEditingJob(null); }} onSave={handleSave} editingJob={editingJob} />
     </div>
   );
 }

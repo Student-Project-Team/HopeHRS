@@ -2,11 +2,7 @@ import { useContext } from 'react';
 import { UserRightsContext } from '../context/UserRightsContext';
 
 export function useRights() {
-  const { hasRight, loading, rights } = useContext(UserRightsContext);
-  
-  if (!rights) {
-    return { loading: true, rights: {} };
-  }
+  const { hasRight, rights } = useContext(UserRightsContext);
   
   const canViewEmployees = () => hasRight('EMP_VIEW');
   const canAddEmployee = () => hasRight('EMP_ADD');
@@ -31,7 +27,6 @@ export function useRights() {
   const canManageUsers = () => hasRight('ADM_USER');
   
   return {
-    loading,
     rights,
     canViewEmployees,
     canAddEmployee,

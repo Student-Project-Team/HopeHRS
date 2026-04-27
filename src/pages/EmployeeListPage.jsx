@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useRights } from '../hooks/useRights';  // ← ADD THIS
+import { useRights } from '../hooks/useRights';
 import { getAllEmployees } from '../services/employeeService';
 
 export default function EmployeeListPage() {
   const { user } = useAuth();
-  const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();  // ← ADD THIS
+  const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +34,6 @@ export default function EmployeeListPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Employees</h1>
-        {/* Use rights-based check instead of hardcoded userType */}
         {canAddEmployee() && (
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
             + Add Employee
@@ -51,10 +50,7 @@ export default function EmployeeListPage() {
               <th className="px-6 py-3 text-left">Gender</th>
               <th className="px-6 py-3 text-left">Hire Date</th>
               <th className="px-6 py-3 text-left">Status</th>
-              {/* Show Actions column if user can edit or delete */}
-              {(canEditEmployee() || canDeleteEmployee()) && (
-                <th className="px-6 py-3 text-left">Actions</th>
-              )}
+              {(canEditEmployee() || canDeleteEmployee()) && <th className="px-6 py-3 text-left">Actions</th>}
             </tr>
           </thead>
           <tbody>

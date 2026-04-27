@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -9,6 +9,7 @@ export function UserRightsProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
   const [rights, setRights] = useState({});
   const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   const allRights = [
     'EMP_VIEW', 'EMP_ADD', 'EMP_EDIT', 'EMP_DEL',
@@ -28,6 +29,11 @@ export function UserRightsProvider({ children }) {
 
   useEffect(() => {
     const fetchUserRights = async () => {
+      if (hasFetched.current) {
+        setLoading(false);
+        return;
+      }
+
       if (!user?.id) {
         setLoading(false);
         return;
@@ -50,6 +56,7 @@ export function UserRightsProvider({ children }) {
         });
 
         setRights(rightsMap);
+        hasFetched.current = true;
       } catch (error) {
         console.error('Error fetching user rights:', error);
       } finally {
@@ -67,7 +74,7 @@ export function UserRightsProvider({ children }) {
   };
 
   return (
-    <UserRightsContext.Provider value={{ rights, loading, hasRight, allRights }}>
+    <UserRightsContext.Provider value={{ rights, loading: false, hasRight, allRights }}>
       {children}
     </UserRightsContext.Provider>
   );
