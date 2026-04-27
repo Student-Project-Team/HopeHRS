@@ -8,6 +8,7 @@ export const UserRightsContext = createContext();
 export function UserRightsProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
   const [rights, setRights] = useState({});
+  const [loading, setLoading] = useState(true); // ADDED: proper loading state
   const hasFetched = useRef(false);
 
   const allRights = [
@@ -28,10 +29,17 @@ export function UserRightsProvider({ children }) {
 
   useEffect(() => {
     const fetchUserRights = async () => {
-      if (hasFetched.current) return;
-      if (!user?.id) return;
+      if (hasFetched.current) {
+        setLoading(false); // ADDED
+        return;
+      }
+      if (!user?.id) {
+        setLoading(false); // ADDED
+        return;
+      }
 
       try {
+        setLoading(true); // ADDED
         const { data: rightsData, error: rightsError } = await supabase
           .from('UserModule_Rights')
           .select('right_id, is_allowed')
@@ -51,11 +59,15 @@ export function UserRightsProvider({ children }) {
         hasFetched.current = true;
       } catch (error) {
         console.error('Error fetching user rights:', error);
+      } finally {
+        setLoading(false); // ADDED
       }
     };
 
     if (!authLoading && user?.id) {
       fetchUserRights();
+    } else if (!authLoading && !user?.id) {
+      setLoading(false); // ADDED - handle no user case
     }
   }, [user, authLoading]);
 
@@ -63,9 +75,9 @@ export function UserRightsProvider({ children }) {
     return rights[rightCode] === true;
   };
 
-  // ALWAYS return loading: false - no loading state ever
+  // CHANGED: return actual loading state instead of hardcoded false
   return (
-    <UserRightsContext.Provider value={{ rights, loading: false, hasRight, allRights }}>
+    <UserRightsContext.Provider value={{ rights, loading, hasRight, allRights }}>
       {children}
     </UserRightsContext.Provider>
   );
