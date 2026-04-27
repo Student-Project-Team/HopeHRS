@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getAllEmployees } from '../services/employeeService';
 
 export default function EmployeeListPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
   const [employees, setEmployees] = useState([]);
@@ -58,7 +60,7 @@ export default function EmployeeListPage() {
               <tr 
                 key={emp.empno} 
                 className="border-t cursor-pointer hover:bg-gray-50" 
-                onClick={() => window.location.href = `/employees/${emp.empno}`}
+                onClick={() => navigate(`/employees/${emp.empno}`)}
               >
                 <td className="px-6 py-4">{emp.empno}</td>
                 <td className="px-6 py-4">{emp.lastname}</td>

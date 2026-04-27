@@ -15,7 +15,6 @@ export default function EmployeeDetailPage() {
         setLoading(true);
         const empData = await getEmployeeById(empno);
         setEmployee(empData);
-        setError(null);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,18 +32,11 @@ export default function EmployeeDetailPage() {
 
   return (
     <div>
-      <button 
-        onClick={() => navigate('/employees')} 
-        className="mb-4 text-blue-600 hover:text-blue-800"
-      >
+      <button onClick={() => navigate('/employees')} className="mb-4 text-blue-600 hover:text-blue-800">
         ← Back to Employees
       </button>
-      
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold mb-4">
-          {employee.firstname} {employee.lastname}
-        </h1>
-        
+        <h1 className="text-2xl font-bold mb-4">{employee.firstname} {employee.lastname}</h1>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p><strong>Emp No:</strong> {employee.empno}</p>
@@ -55,11 +47,7 @@ export default function EmployeeDetailPage() {
             <p><strong>Hire Date:</strong> {employee.hiredate}</p>
             <p><strong>Separation Date:</strong> {employee.sepDate || '-'}</p>
             <p><strong>Status:</strong> 
-              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                employee.record_status === 'ACTIVE' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
+              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${employee.record_status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {employee.record_status}
               </span>
             </p>

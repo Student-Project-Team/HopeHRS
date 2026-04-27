@@ -27,7 +27,7 @@ function App() {
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<Navigate to="/employees" replace />} />
               <Route path="/employees" element={<EmployeeListPage />} />
               <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
               <Route path="/jobhistory" element={<JobHistory />} />
