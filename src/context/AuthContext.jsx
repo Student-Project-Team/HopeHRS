@@ -7,7 +7,7 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false); // ADD THIS LINE
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -35,15 +35,14 @@ export function AuthProvider({ children }) {
         setUser(null);
       } finally {
         setLoading(false);
-        setInitialized(true); // ADD THIS LINE
+        setInitialized(true);
       }
     };
 
     getUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // ONLY process if already initialized
-      if (!initialized) return; // ADD THIS LINE
+      if (!initialized) return;
       
       if (session?.user) {
         const { data: userData } = await supabase
@@ -65,7 +64,7 @@ export function AuthProvider({ children }) {
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, [initialized]); // ADD initialized to dependency array
+  }, [initialized]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
