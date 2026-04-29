@@ -7,7 +7,7 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
     gender: 'M',
     birthdate: '',
     hiredate: '',
-    sepDate: '',
+    sepdate: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +19,7 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
         gender: employee.gender || 'M',
         birthdate: employee.birthdate || '',
         hiredate: employee.hiredate || '',
-        sepDate: employee.sepDate || '',
+        sepdate: employee.sepdate || '',
       });
     }
   }, [isOpen, employee]);
@@ -39,7 +39,7 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
         gender: form.gender,
         birthdate: form.birthdate,
         hiredate: form.hiredate,
-        sepDate: form.sepDate || null,
+        sepdate: form.sepdate || null,
       };
       await onSave(payload);
       onClose();
@@ -160,8 +160,8 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
             </label>
             <input
               type="date"
-              name="sepDate"
-              value={form.sepDate}
+              name="sepdate"
+              value={form.sepdate}
               onChange={handleChange}
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"
             />

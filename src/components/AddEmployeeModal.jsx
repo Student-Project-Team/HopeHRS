@@ -8,7 +8,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSave }) {
     gender: 'M',
     birthdate: '',
     hiredate: '',
-    sepDate: '',
+    sepdate: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -28,10 +28,10 @@ export default function AddEmployeeModal({ isOpen, onClose, onSave }) {
         gender: form.gender,
         birthdate: form.birthdate,
         hiredate: form.hiredate,
-        sepDate: form.sepDate || null,
+        sepdate: form.sepdate || null,
       };
       await onSave(payload);
-      setForm({ empno: '', lastname: '', firstname: '', gender: 'M', birthdate: '', hiredate: '', sepDate: '' });
+      setForm({ empno: '', lastname: '', firstname: '', gender: 'M', birthdate: '', hiredate: '', sepdate: '' });
       onClose();
     } catch (err) {
       alert(err.message);
@@ -164,8 +164,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onSave }) {
             </label>
             <input
               type="date"
-              name="sepDate"
-              value={form.sepDate}
+              name="sepdate"
+              value={form.sepdate}
               onChange={handleChange}
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"
             />

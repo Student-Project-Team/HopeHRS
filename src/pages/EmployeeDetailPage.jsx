@@ -154,7 +154,7 @@ export default function EmployeeDetailPage() {
             </p>
             <p className="text-sm">
               <strong className="text-slate-600">Separation Date:</strong>{' '}
-              <span className="text-slate-800">{employee.sepDate || '-'}</span>
+              <span className="text-slate-800">{employee.sepdate || '-'}</span>
             </p>
             <p className="text-sm">
               <strong className="text-slate-600">Status:</strong>
