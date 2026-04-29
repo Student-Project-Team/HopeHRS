@@ -27,9 +27,9 @@ export function UserRightsProvider({ children }) {
         
         const userType = user?.user_type || 'USER';
         
-        // For ADMIN and SUPERADMIN, grant all rights regardless of DB
-        if (userType === 'ADMIN' || userType === 'SUPERADMIN') {
-          console.log(`${userType} detected - granting all rights`);
+        // For SUPERADMIN - grant all rights (including DELETE)
+        if (userType === 'SUPERADMIN') {
+          console.log('SUPERADMIN detected - granting all rights (including delete)');
           const allRights = {
             EMP_VIEW: true, EMP_ADD: true, EMP_EDIT: true, EMP_DEL: true,
             JH_VIEW: true, JH_ADD: true, JH_EDIT: true, JH_DEL: true,
@@ -42,8 +42,22 @@ export function UserRightsProvider({ children }) {
           return;
         }
         
+        // For ADMIN - grant all rights EXCEPT DELETE
+        if (userType === 'ADMIN') {
+          console.log('ADMIN detected - granting all rights EXCEPT delete');
+          const adminRights = {
+            EMP_VIEW: true, EMP_ADD: true, EMP_EDIT: true, EMP_DEL: false,
+            JH_VIEW: true, JH_ADD: true, JH_EDIT: true, JH_DEL: false,
+            JOB_VIEW: true, JOB_ADD: true, JOB_EDIT: true, JOB_DEL: false,
+            DEPT_VIEW: true, DEPT_ADD: true, DEPT_EDIT: true, DEPT_DEL: false,
+            ADM_USER: true
+          };
+          setRights(adminRights);
+          setLoading(false);
+          return;
+        }
+        
         // For USER role, try to fetch from DB
-        // First, get the actual column names by fetching one row
         const { data: sampleData, error: sampleError } = await supabase
           .from('UserModule_Rights')
           .select('*')
@@ -51,7 +65,6 @@ export function UserRightsProvider({ children }) {
         
         if (sampleError) {
           console.warn('Cannot access UserModule_Rights table:', sampleError.message);
-          // Default USER rights
           const defaultRights = {
             EMP_VIEW: true, EMP_ADD: false, EMP_EDIT: false, EMP_DEL: false,
             JH_VIEW: true, JH_ADD: false, JH_EDIT: false, JH_DEL: false,
@@ -70,11 +83,9 @@ export function UserRightsProvider({ children }) {
         
         if (sampleData && sampleData.length > 0) {
           const firstRow = sampleData[0];
-          // Try to find the right column names
           if ('right_code' in firstRow) codeColumn = 'right_code';
           else if ('code' in firstRow) codeColumn = 'code';
           else if ('rightCode' in firstRow) codeColumn = 'rightCode';
-          else if ('right_code' in firstRow) codeColumn = 'right_code';
           
           if ('right_value' in firstRow) valueColumn = 'right_value';
           else if ('value' in firstRow) valueColumn = 'value';
@@ -156,10 +167,11 @@ export function UserRightsProvider({ children }) {
 
   const hasRight = (rightCode) => {
     const userType = user?.user_type;
-    // ADMIN and SUPERADMIN have all rights
-    if (userType === 'ADMIN' || userType === 'SUPERADMIN') {
+    // SUPERADMIN has all rights
+    if (userType === 'SUPERADMIN') {
       return true;
     }
+    // ADMIN only has non-delete rights (handled by the rights map)
     return rights[rightCode] === true;
   };
 
