@@ -30,7 +30,7 @@ export default function AuthCallback() {
 
         // Check if user exists in your user table by email
         const { data: userData, error: userError } = await supabase
-          .from('user')
+          .from('users')
           .select('user_type, record_status')
           .eq('email', session.user.email)
           .maybeSingle();
