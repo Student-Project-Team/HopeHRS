@@ -1,3 +1,4 @@
+// hooks/useRights.js
 import { useContext, useMemo } from 'react';
 import { UserRightsContext } from '../context/UserRightsContext';
 import { useAuth } from './useAuth';
@@ -13,36 +14,37 @@ export function useRights() {
   
   const returnValue = useMemo(() => ({
     rights,
-    isAdminOrSuperAdmin,
+    isAdmin,
     isSuperAdmin,
+    isAdminOrSuperAdmin,
     
     // Employee rights
     canViewEmployees: () => isAdminOrSuperAdmin || hasRight('EMP_VIEW'),
     canAddEmployee: () => isAdminOrSuperAdmin || hasRight('EMP_ADD'),
     canEditEmployee: () => isAdminOrSuperAdmin || hasRight('EMP_EDIT'),
-    canDeleteEmployee: () => isAdminOrSuperAdmin || hasRight('EMP_DEL'),
+    canDeleteEmployee: () => isSuperAdmin || hasRight('EMP_DEL'), // ONLY SUPERADMIN
     
     // Job History rights
     canViewJobHistory: () => isAdminOrSuperAdmin || hasRight('JH_VIEW'),
     canAddJobHistory: () => isAdminOrSuperAdmin || hasRight('JH_ADD'),
     canEditJobHistory: () => isAdminOrSuperAdmin || hasRight('JH_EDIT'),
-    canDeleteJobHistory: () => isAdminOrSuperAdmin || hasRight('JH_DEL'),
+    canDeleteJobHistory: () => isSuperAdmin || hasRight('JH_DEL'), // ONLY SUPERADMIN
     
     // Job rights
     canViewJobs: () => isAdminOrSuperAdmin || hasRight('JOB_VIEW'),
     canAddJob: () => isAdminOrSuperAdmin || hasRight('JOB_ADD'),
     canEditJob: () => isAdminOrSuperAdmin || hasRight('JOB_EDIT'),
-    canDeleteJob: () => isAdminOrSuperAdmin || hasRight('JOB_DEL'),
+    canDeleteJob: () => isSuperAdmin || hasRight('JOB_DEL'), // ONLY SUPERADMIN
     
     // Department rights
     canViewDepartments: () => isAdminOrSuperAdmin || hasRight('DEPT_VIEW'),
     canAddDepartment: () => isAdminOrSuperAdmin || hasRight('DEPT_ADD'),
     canEditDepartment: () => isAdminOrSuperAdmin || hasRight('DEPT_EDIT'),
-    canDeleteDepartment: () => isAdminOrSuperAdmin || hasRight('DEPT_DEL'),
+    canDeleteDepartment: () => isSuperAdmin || hasRight('DEPT_DEL'), // ONLY SUPERADMIN
     
     // Admin rights
     canManageUsers: () => isAdminOrSuperAdmin || hasRight('ADM_USER')
-  }), [hasRight, rights, isAdminOrSuperAdmin]);
+  }), [hasRight, rights, isAdmin, isSuperAdmin, isAdminOrSuperAdmin]);
 
   return returnValue;
 }
