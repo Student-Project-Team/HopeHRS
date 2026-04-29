@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
-import { getAllDepartments, createDepartment, updateDepartment } from '../services/departmentService';
-import AddDeptModal from '../components/AddDeptModal';
-import EditDeptModal from '../components/EditDeptModal';
+import { getAllJobs, createJob, updateJob } from '../services/jobService';
+import AddJobModal from '../components/AddJobModal';
+import EditJobModal from '../components/EditJobModal';
 
-export default function Departments() {
+export default function JobListPage() {
   const { user } = useAuth();
-  const { canAddDepartment, canEditDepartment } = useRights();
-  const [departments, setDepartments] = useState([]);
+  const { canAddJob, canEditJob } = useRights();
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingDept, setEditingDept] = useState(null);
+  const [editingJob, setEditingJob] = useState(null);
 
   const userType = user?.user_type || 'USER';
 
-  const fetchDepartments = async () => {
+  const fetchJobs = async () => {
     try {
       setLoading(true);
-      const data = await getAllDepartments(userType);
-      setDepartments(data || []);
+      const data = await getAllJobs(userType);
+      setJobs(data || []);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -31,26 +31,26 @@ export default function Departments() {
   };
 
   useEffect(() => {
-    fetchDepartments();
+    fetchJobs();
   }, [userType]);
 
-  const handleAdd = async (deptData) => {
-    await createDepartment(deptData, user?.email);
+  const handleAdd = async (jobData) => {
+    await createJob(jobData, user?.email);
     setShowAddModal(false);
-    await fetchDepartments();
+    await fetchJobs();
   };
 
-  const handleEdit = async (deptData) => {
-    await updateDepartment(editingDept.deptCode, deptData, user?.email);
+  const handleEdit = async (jobData) => {
+    await updateJob(editingJob.jobCode, jobData, user?.email);
     setShowEditModal(false);
-    setEditingDept(null);
-    await fetchDepartments();
+    setEditingJob(null);
+    await fetchJobs();
   };
 
   if (loading) return (
     <div className="flex items-center justify-center gap-2 text-slate-500 py-8">
       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
-      Loading departments...
+      Loading jobs...
     </div>
   );
 
@@ -64,15 +64,15 @@ export default function Departments() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Departments</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage organizational departments</p>
+          <h1 className="text-2xl font-semibold text-slate-800">Jobs</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Manage job positions and descriptions</p>
         </div>
-        {canAddDepartment() && (
+        {canAddJob() && (
           <button
             onClick={() => setShowAddModal(true)}
             className="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
           >
-            Add Department
+            Add Job
           </button>
         )}
       </div>
@@ -82,30 +82,40 @@ export default function Departments() {
           <table className="min-w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Dept Code</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Department Name</th>
-                {canEditDepartment() && (
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Job Code</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Job Description</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                {canEditJob() && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {departments.length === 0 ? (
+              {jobs.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-slate-400 text-sm">
-                    No departments found
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
+                    No jobs found
                   </td>
                 </tr>
               ) : (
-                departments.map((dept) => (
-                  <tr key={dept.deptCode} className="hover:bg-slate-50 transition">
-                    <td className="px-6 py-4 text-sm font-medium text-slate-700">{dept.deptCode}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{dept.deptName}</td>
-                    {canEditDepartment() && (
+                jobs.map((job) => (
+                  <tr key={job.jobCode} className="hover:bg-slate-50 transition">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-700">{job.jobCode}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{job.jobDesc}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2 py-1 text-xs rounded-md ${
+                        job.record_status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {job.record_status}
+                      </span>
+                    </td>
+                    {canEditJob() && (
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {canEditDepartment() && dept.record_status === 'ACTIVE' && (
+                        {canEditJob() && job.record_status === 'ACTIVE' && (
                           <button
-                            onClick={() => { setEditingDept(dept); setShowEditModal(true); }}
+                            onClick={() => { setEditingJob(job); setShowEditModal(true); }}
                             className="text-slate-600 hover:text-slate-800 text-sm font-medium transition"
                           >
                             Edit
@@ -121,17 +131,17 @@ export default function Departments() {
         </div>
       </div>
 
-      <AddDeptModal
+      <AddJobModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSave={handleAdd}
       />
 
-      <EditDeptModal
+      <EditJobModal
         isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setEditingDept(null); }}
+        onClose={() => { setShowEditModal(false); setEditingJob(null); }}
         onSave={handleEdit}
-        dept={editingDept}
+        job={editingJob}
       />
     </div>
   );

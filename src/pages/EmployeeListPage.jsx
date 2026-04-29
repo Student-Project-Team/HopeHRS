@@ -14,7 +14,7 @@ import AddEmployeeModal from '../components/AddEmployeeModal';
 import EditEmployeeModal from '../components/EditEmployeeModal';
 import SoftDeleteConfirmDialog from '../components/SoftDeleteConfirmDialog';
 
-export default function Employees() {
+export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
@@ -204,7 +204,7 @@ export default function Employees() {
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.firstname}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.gender}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.hiredate}</td>
-                  <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-500">{emp.sep_date || '-'}</td>
+                  <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-500">{emp.sepdate || '-'}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">
                     {currentJobs[emp.empno]?.jobDesc || currentJobs[emp.empno]?.jobcode || '-'}
                   </td>
