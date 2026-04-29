@@ -33,7 +33,7 @@ export default function Login() {
 
       // Check if user exists in your user table
       const { data: userData, error: userError } = await supabase
-        .from('user')
+        .from('users')
         .select('record_status, user_type')
         .eq('email', data.user.email)
         .maybeSingle();
@@ -89,16 +89,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-md p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Sign in</h1>
-          <p className="text-gray-500 text-sm">Access your HR dashboard</p>
+          <div className="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-white text-lg font-bold mx-auto mb-4">
+            HR
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-800 mb-1 text-center">Sign in</h1>
+          <p className="text-slate-500 text-sm text-center">Access your HR dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Email address
             </label>
             <input
@@ -106,13 +109,13 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Password
             </label>
             <input
@@ -120,7 +123,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
@@ -132,7 +135,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+            className="w-full bg-slate-700 hover:bg-slate-800 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -146,14 +149,14 @@ export default function Login() {
         </form>
 
         <div className="flex items-center gap-3 my-5">
-          <hr className="flex-1 border-gray-100" />
-          <span className="text-xs text-gray-400">or continue with</span>
-          <hr className="flex-1 border-gray-100" />
+          <hr className="flex-1 border-slate-200" />
+          <span className="text-xs text-slate-400">or continue with</span>
+          <hr className="flex-1 border-slate-200" />
         </div>
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+          className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -164,9 +167,9 @@ export default function Login() {
           Sign in with Google
         </button>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-slate-500 mt-6">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline font-medium">
+          <Link to="/register" className="text-slate-700 hover:underline font-medium">
             Create account
           </Link>
         </p>

@@ -5,7 +5,7 @@ import { getAllDepartments, createDepartment, updateDepartment } from '../servic
 import AddDeptModal from '../components/AddDeptModal';
 import EditDeptModal from '../components/EditDeptModal';
 
-export default function Departments() {
+export default function DeptListPage() {
   const { user } = useAuth();
   const { canAddDepartment, canEditDepartment } = useRights();
   const [departments, setDepartments] = useState([]);
