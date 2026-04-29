@@ -1,24 +1,25 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';  // ← Only once
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { UserRightsProvider } from './context/UserRightsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeletedItemsGuard from './components/guards/DeletedItemsGuard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
 import Layout from './components/Layout';
+import EmployeeListPage from './pages/EmployeeListPage';
+import EmployeeDetailPage from './pages/EmployeeDetailPage';
+import JobListPage from './pages/JobListPage';
+import DeptListPage from './pages/DeptListPage';
+import DeletedItems from './pages/DeletedItems';
 
-// Placeholder pages
-const Employees = () => <div className="p-6">Employees Page</div>;
-const JobHistory = () => <div className="p-6">Job History Page</div>;
-const Jobs = () => <div className="p-6">Jobs Page</div>;
-const Departments = () => <div className="p-6">Departments Page</div>;
+
 const Admin = () => <div className="p-6">Admin Page</div>;
-const DeletedItems = () => <div className="p-6">Deleted Items Page (ADMIN/SUPERADMIN only)</div>;
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <UserRightsProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -26,13 +27,14 @@ function App() {
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<Navigate to="/employees" replace />} />
-              <Route path="/employees" element={<Employees />} />
-              <Route path="/jobhistory" element={<JobHistory />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/departments" element={<Departments />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/employees" element={<EmployeeListPage />} />
+              <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
+              {/* REMOVE THIS LINE - /jobhistory route */}
+              {/* <Route path="/jobhistory" element={<JobHistory />} /> */}
+              <Route path="/jobs" element={<JobListPage />} />
+              <Route path="/departments" element={<DeptListPage />} />
               <Route path="/admin" element={<Admin />} />
-              
               <Route path="/deleted-items" element={
                 <DeletedItemsGuard>
                   <DeletedItems />
@@ -41,8 +43,8 @@ function App() {
             </Route>
           </Route>
         </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      </UserRightsProvider>
+    </AuthProvider>
   );
 }
 
