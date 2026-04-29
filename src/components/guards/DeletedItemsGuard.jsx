@@ -6,21 +6,18 @@ export default function DeletedItemsGuard({ children }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="ml-2 text-gray-600">Loading...</p>
+        <p className="ml-2">Loading...</p>
       </div>
     );
   }
 
-  // Check if user is ADMIN or SUPERADMIN
   const userType = user?.user_type;
   
   if (userType !== 'ADMIN' && userType !== 'SUPERADMIN') {
-    // USER cannot access deleted-items page
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/employees" replace />;
   }
 
-  // ADMIN and SUPERADMIN can access
   return children;
 }

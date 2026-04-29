@@ -5,7 +5,7 @@ import { getAllDepartments, createDepartment, updateDepartment } from '../servic
 import AddDeptModal from '../components/AddDeptModal';
 import EditDeptModal from '../components/EditDeptModal';
 
-export default function Departments() {
+export default function DeptListPage() {
   const { user } = useAuth();
   const { canAddDepartment, canEditDepartment } = useRights();
   const [departments, setDepartments] = useState([]);
@@ -16,6 +16,7 @@ export default function Departments() {
   const [editingDept, setEditingDept] = useState(null);
 
   const userType = user?.user_type || 'USER';
+  const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
   const fetchDepartments = async () => {
     try {
@@ -84,6 +85,9 @@ export default function Departments() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Dept Code</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Department Name</th>
+                {isAdminPlus && (
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
+                )}
                 {canEditDepartment() && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 )}
@@ -92,7 +96,7 @@ export default function Departments() {
             <tbody className="divide-y divide-slate-100">
               {departments.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={isAdminPlus ? 4 : 3} className="px-6 py-12 text-center text-slate-400 text-sm">
                     No departments found
                   </td>
                 </tr>
@@ -101,6 +105,11 @@ export default function Departments() {
                   <tr key={dept.deptCode} className="hover:bg-slate-50 transition">
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{dept.deptCode}</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{dept.deptName}</td>
+                    {isAdminPlus && (
+                      <td className="px-6 py-4 text-xs text-slate-500 max-w-[200px] truncate" title={dept.stamp}>
+                        {dept.stamp || '-'}
+                      </td>
+                    )}
                     {canEditDepartment() && (
                       <td className="px-6 py-4 whitespace-nowrap">
                         {canEditDepartment() && dept.record_status === 'ACTIVE' && (

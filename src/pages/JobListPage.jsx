@@ -5,7 +5,7 @@ import { getAllJobs, createJob, updateJob } from '../services/jobService';
 import AddJobModal from '../components/AddJobModal';
 import EditJobModal from '../components/EditJobModal';
 
-export default function Jobs() {
+export default function JobListPage() {
   const { user } = useAuth();
   const { canAddJob, canEditJob } = useRights();
   const [jobs, setJobs] = useState([]);
@@ -16,6 +16,7 @@ export default function Jobs() {
   const [editingJob, setEditingJob] = useState(null);
 
   const userType = user?.user_type || 'USER';
+  const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
   const fetchJobs = async () => {
     try {
@@ -85,6 +86,9 @@ export default function Jobs() {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Job Code</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Job Description</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                {isAdminPlus && (
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
+                )}
                 {canEditJob() && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 )}
@@ -93,7 +97,7 @@ export default function Jobs() {
             <tbody className="divide-y divide-slate-100">
               {jobs.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={isAdminPlus ? 5 : 4} className="px-6 py-12 text-center text-slate-400 text-sm">
                     No jobs found
                   </td>
                 </tr>
@@ -111,6 +115,11 @@ export default function Jobs() {
                         {job.record_status}
                       </span>
                     </td>
+                    {isAdminPlus && (
+                      <td className="px-6 py-4 text-xs text-slate-500 max-w-[200px] truncate" title={job.stamp}>
+                        {job.stamp || '-'}
+                      </td>
+                    )}
                     {canEditJob() && (
                       <td className="px-6 py-4 whitespace-nowrap">
                         {canEditJob() && job.record_status === 'ACTIVE' && (

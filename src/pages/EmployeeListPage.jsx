@@ -14,10 +14,10 @@ import AddEmployeeModal from '../components/AddEmployeeModal';
 import EditEmployeeModal from '../components/EditEmployeeModal';
 import SoftDeleteConfirmDialog from '../components/SoftDeleteConfirmDialog';
 
-export default function Employees() {
+export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
+  const { canAddEmployee, canEditEmployee, canDeleteEmployee, isAdminOrSuperAdmin } = useRights();
 
   const [employees, setEmployees] = useState([]);
   const [currentJobs, setCurrentJobs] = useState({});
@@ -25,16 +25,14 @@ export default function Employees() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
 
-  // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editEmployee, setEditEmployee] = useState(null);       // triggers EditEmployeeModal
-  const [deleteTarget, setDeleteTarget] = useState(null);       // triggers SoftDeleteConfirmDialog
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
-  const isSuperAdmin = userType === 'SUPERADMIN';
 
   const fetchEmployees = async () => {
     try {
@@ -69,21 +67,18 @@ export default function Employees() {
     return emp.record_status === statusFilter;
   });
 
-  // EMP_ADD
   const handleAdd = async (data) => {
     await createEmployee(data);
     setShowAddModal(false);
     await fetchEmployees();
   };
 
-  // EMP_EDIT
   const handleEdit = async (data) => {
     await updateEmployee(editEmployee.empno, data);
     setEditEmployee(null);
     await fetchEmployees();
   };
 
-  // EMP_DEL — opens confirm dialog
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -126,7 +121,6 @@ export default function Employees() {
 
   return (
     <div className="p-4 md:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">Employees</h1>
@@ -145,7 +139,6 @@ export default function Employees() {
         )}
       </div>
 
-      {/* Status Filter — ADMIN+ only */}
       {isAdminPlus && (
         <div className="flex flex-wrap gap-2 mb-4">
           {['ACTIVE', 'INACTIVE', 'ALL'].map((f) => (
@@ -164,14 +157,10 @@ export default function Employees() {
         </div>
       )}
 
-      {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
         {filteredEmployees.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
             <p className="font-medium">No employees found</p>
-            {isAdminPlus && statusFilter !== 'ALL' && (
-              <p className="text-sm mt-1">Try changing the status filter</p>
-            )}
           </div>
         ) : (
           <table className="min-w-[1100px] md:min-w-full divide-y divide-slate-100">
@@ -204,7 +193,7 @@ export default function Employees() {
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.firstname}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.gender}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">{emp.hiredate}</td>
-                  <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-500">{emp.sep_date || '-'}</td>
+                  <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-500">{emp.sepdate || '-'}</td>
                   <td className="px-4 md:px-6 py-3 md:py-4 text-sm text-slate-600">
                     {currentJobs[emp.empno]?.jobDesc || currentJobs[emp.empno]?.jobcode || '-'}
                   </td>
@@ -242,7 +231,7 @@ export default function Employees() {
                       </button>
                     )}
 
-                    {canDeleteEmployee() && isSuperAdmin && emp.record_status === 'ACTIVE' && (
+                    {canDeleteEmployee() && emp.record_status === 'ACTIVE' && (
                       <button
                         onClick={() => setDeleteTarget(emp)}
                         className="text-red-600 hover:text-red-700 text-sm font-medium transition"
@@ -268,14 +257,12 @@ export default function Employees() {
         )}
       </div>
 
-      {/* EMP_ADD gated */}
       <AddEmployeeModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSave={handleAdd}
       />
 
-      {/* EMP_EDIT gated */}
       <EditEmployeeModal
         isOpen={!!editEmployee}
         onClose={() => setEditEmployee(null)}
@@ -283,7 +270,6 @@ export default function Employees() {
         employee={editEmployee}
       />
 
-      {/* EMP_DEL gated */}
       <SoftDeleteConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
