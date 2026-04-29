@@ -33,6 +33,7 @@ export default function EmployeeListPage() {
 
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
+  const isSuperAdmin = userType === 'SUPERADMIN';
 
   const fetchEmployees = async () => {
     try {
@@ -231,7 +232,8 @@ export default function EmployeeListPage() {
                       </button>
                     )}
 
-                    {canDeleteEmployee() && emp.record_status === 'ACTIVE' && (
+                    {/* DELETE BUTTON - ONLY SUPERADMIN CAN SEE THIS */}
+                    {canDeleteEmployee() && isSuperAdmin && emp.record_status === 'ACTIVE' && (
                       <button
                         onClick={() => setDeleteTarget(emp)}
                         className="text-red-600 hover:text-red-700 text-sm font-medium transition"
