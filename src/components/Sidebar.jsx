@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
   { label: 'Employees', path: '/employees' },
-  { label: 'Job History', path: '/jobhistory' },
   { label: 'Jobs', path: '/jobs' },
   { label: 'Departments', path: '/departments' },
   { label: 'Admin', path: '/admin' },
