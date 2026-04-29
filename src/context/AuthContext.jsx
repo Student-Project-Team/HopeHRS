@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
         
         if (session?.user) {
           const { data: userData } = await supabase
-            .from('user')
+            .from('users')
             .select('user_type, record_status')
             .eq('email', session.user.email)
             .maybeSingle();
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
       
       if (session?.user) {
         const { data: userData } = await supabase
-          .from('user')
+          .from('users')
           .select('user_type, record_status')
           .eq('email', session.user.email)
           .maybeSingle();
