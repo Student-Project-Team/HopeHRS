@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
@@ -20,7 +20,9 @@ export default function EmployeeDetailPage() {
 
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Use a counter for refreshing instead of key
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // AddJobHistoryForm
   const [showAddForm, setShowAddForm] = useState(false);
@@ -31,7 +33,9 @@ export default function EmployeeDetailPage() {
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
-  const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
+  const triggerRefresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   // Fetch employee profile
   useEffect(() => {
@@ -51,25 +55,26 @@ export default function EmployeeDetailPage() {
     if (empno) fetchData();
   }, [empno]);
 
-  // Fetch job history
+  // Fetch job history - separated from profile fetch to avoid blocking
+  const fetchJobHistory = useCallback(async () => {
+    if (!canViewJobHistory() || !empno) return;
+
+    setJobHistoryLoading(true);
+    try {
+      const data = await getJobHistoryByEmployee(empno, userType);
+      setJobHistory(data || []);
+    } catch (err) {
+      console.error('ERROR fetching job history:', err);
+      setJobHistory([]);
+    } finally {
+      setJobHistoryLoading(false);
+    }
+  }, [empno, userType, canViewJobHistory]);
+
+  // Fetch job history when empno changes or refresh is triggered
   useEffect(() => {
-    const fetchJobHistory = async () => {
-      if (!canViewJobHistory()) return;
-
-      setJobHistoryLoading(true);
-      try {
-        const data = await getJobHistoryByEmployee(empno, userType);
-        setJobHistory(data || []);
-      } catch (err) {
-        console.error('ERROR fetching job history:', err);
-        setJobHistory([]);
-      } finally {
-        setJobHistoryLoading(false);
-      }
-    };
-
-    if (empno && canViewJobHistory()) fetchJobHistory();
-  }, [empno, userType, canViewJobHistory, refreshKey]);
+    fetchJobHistory();
+  }, [fetchJobHistory, refreshTrigger]);
 
   // Soft-delete a job history record (JH_DEL)
   const handleDeleteJobHistory = async (item) => {
@@ -195,7 +200,8 @@ export default function EmployeeDetailPage() {
             )}
           </div>
 
-          {jobHistoryLoading ? (
+          {/* Show loading state */}
+          {jobHistoryLoading && jobHistory.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
               <span className="ml-2 text-slate-500">Loading job history...</span>
@@ -207,6 +213,7 @@ export default function EmployeeDetailPage() {
               onEdit={(item) => setEditItem(item)}
               onDelete={handleDeleteJobHistory}
               onRecover={handleRecoverJobHistory}
+              isLoading={jobHistoryLoading}
             />
           )}
         </div>
