@@ -11,12 +11,9 @@ import EmployeeListPage from './pages/EmployeeListPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
-
-// REMOVE THIS LINE - JobHistory is no longer needed
-// const JobHistory = () => <div className="p-6">Job History Page</div>;
+import DeletedItems from './pages/DeletedItems'; // ← real component
 
 const Admin = () => <div className="p-6">Admin Page</div>;
-const DeletedItems = () => <div className="p-6">Deleted Items Page (ADMIN/SUPERADMIN only)</div>;
 
 function App() {
   return (
@@ -26,14 +23,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/callback" element={<AuthCallback />} />
-          
+
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/employees" element={<EmployeeListPage />} />
               <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
-              {/* REMOVE THIS LINE - /jobhistory route */}
-              {/* <Route path="/jobhistory" element={<JobHistory />} /> */}
               <Route path="/jobs" element={<JobListPage />} />
               <Route path="/departments" element={<DeptListPage />} />
               <Route path="/admin" element={<Admin />} />

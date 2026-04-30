@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useRights } from '../hooks/useRights';
 import { getAllEmployees, recoverEmployee } from '../services/employeeService';
 import { getAllJobs } from '../services/jobService';
 import { getAllDepartments } from '../services/departmentService';
 import { supabase } from '../lib/supabase';
 import { makeStamp } from '../utils/stamp';
 
+// ─── Tab config ────────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'employees',   label: 'Employees' },
   { id: 'jobhistory',  label: 'Job History' },
@@ -14,6 +14,7 @@ const TABS = [
   { id: 'departments', label: 'Departments' },
 ];
 
+// ─── Shared UI pieces ──────────────────────────────────────────────────────────
 function EmptyState({ label }) {
   return (
     <div className="py-16 text-center">
@@ -66,13 +67,23 @@ function RecoverButton({ onClick, loading }) {
   );
 }
 
-function DeletedEmployees({ userEmail }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recoveringId, setRecoveringId] = useState(null);
+// ─── Th helper ────────────────────────────────────────────────────────────────
+function Th({ children }) {
+  return (
+    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+      {children}
+    </th>
+  );
+}
 
-  const fetch = useCallback(async () => {
+// ─── Tab: Deleted Employees ────────────────────────────────────────────────────
+function DeletedEmployees({ userEmail }) {
+  const [rows, setRows]           = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [recoveringId, setRecId]  = useState(null);
+
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllEmployees('ADMIN');
@@ -85,34 +96,32 @@ function DeletedEmployees({ userEmail }) {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { load(); }, [load]);
 
   const handleRecover = async (emp) => {
     if (!window.confirm(`Recover employee ${emp.firstname} ${emp.lastname}?`)) return;
-    setRecoveringId(emp.empno);
+    setRecId(emp.empno);
     try {
       await recoverEmployee(emp.empno, userEmail);
-      await fetch();
+      await load();
     } catch (err) {
       alert('Failed to recover: ' + err.message);
     } finally {
-      setRecoveringId(null);
+      setRecId(null);
     }
   };
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (rows.length === 0) return <EmptyState label="Employees" />;
+  if (error)   return <ErrorState message={error} />;
+  if (!rows.length) return <EmptyState label="Employees" />;
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-100">
         <thead className="bg-slate-50">
           <tr>
-            {['Emp No', 'Last Name', 'First Name', 'Gender', 'Hire Date', 'Sep Date', 'Stamp', 'Actions'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
-                {h}
-              </th>
+            {['Emp No','Last Name','First Name','Gender','Hire Date','Sep Date','Stamp','Actions'].map(h => (
+              <Th key={h}>{h}</Th>
             ))}
           </tr>
         </thead>
@@ -139,24 +148,24 @@ function DeletedEmployees({ userEmail }) {
   );
 }
 
+// ─── Tab: Deleted Job History ─────────────────────────────────────────────────
+// jobhistory table uses a composite PK: empno + jobcode + effdate (no id column)
 function DeletedJobHistory({ userEmail }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recoveringId, setRecoveringId] = useState(null);
+  const [rows, setRows]           = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [recoveringKey, setRecKey] = useState(null); // "empno|jobcode|effdate"
 
-  const fetch = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error: dbErr } = await supabase
         .from('jobhistory')
         .select(`
-          id,
           empno,
           jobcode,
           deptcode,
           effdate,
-          enddate,
           salary,
           stamp,
           record_status,
@@ -176,50 +185,53 @@ function DeletedJobHistory({ userEmail }) {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { load(); }, [load]);
+
+  // Build a unique string key from the composite PK
+  const rowKey = (item) => `${item.empno}|${item.jobcode}|${item.effdate}`;
 
   const handleRecover = async (item) => {
     if (!window.confirm('Recover this job history record?')) return;
-    setRecoveringId(item.id);
+    const key = rowKey(item);
+    setRecKey(key);
     try {
       const stamp = makeStamp('RECOVERED', userEmail);
       const { error: dbErr } = await supabase
         .from('jobhistory')
         .update({ record_status: 'ACTIVE', stamp })
-        .eq('id', item.id);
+        .eq('empno',   item.empno)
+        .eq('jobcode', item.jobcode)
+        .eq('effdate', item.effdate);
       if (dbErr) throw dbErr;
-      await fetch();
+      await load();
     } catch (err) {
       alert('Failed to recover: ' + err.message);
     } finally {
-      setRecoveringId(null);
+      setRecKey(null);
     }
   };
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (rows.length === 0) return <EmptyState label="Job History" />;
+  if (error)   return <ErrorState message={error} />;
+  if (!rows.length) return <EmptyState label="Job History" />;
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-100">
         <thead className="bg-slate-50">
           <tr>
-            {['Emp No', 'Job', 'Department', 'Eff Date', 'End Date', 'Salary', 'Stamp', 'Actions'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
-                {h}
-              </th>
+            {['Emp No','Job Title','Department','Eff Date','Salary','Stamp','Actions'].map(h => (
+              <Th key={h}>{h}</Th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
           {rows.map(item => (
-            <tr key={item.id} className="hover:bg-slate-50 transition opacity-75">
+            <tr key={rowKey(item)} className="hover:bg-slate-50 transition opacity-75">
               <td className="px-4 py-3 text-sm font-medium text-slate-700">{item.empno}</td>
               <td className="px-4 py-3 text-sm text-slate-600">{item.job?.jobdesc || item.jobcode}</td>
               <td className="px-4 py-3 text-sm text-slate-600">{item.dept?.deptname || item.deptcode}</td>
               <td className="px-4 py-3 text-sm text-slate-600">{item.effdate}</td>
-              <td className="px-4 py-3 text-sm text-slate-500">{item.enddate || '-'}</td>
               <td className="px-4 py-3 text-sm text-slate-600">
                 {item.salary ? `$${Number(item.salary).toLocaleString()}` : '-'}
               </td>
@@ -227,7 +239,7 @@ function DeletedJobHistory({ userEmail }) {
                 {item.stamp || '-'}
               </td>
               <td className="px-4 py-3">
-                <RecoverButton onClick={() => handleRecover(item)} loading={recoveringId === item.id} />
+                <RecoverButton onClick={() => handleRecover(item)} loading={recoveringKey === rowKey(item)} />
               </td>
             </tr>
           ))}
@@ -237,13 +249,14 @@ function DeletedJobHistory({ userEmail }) {
   );
 }
 
+// ─── Tab: Deleted Jobs ────────────────────────────────────────────────────────
 function DeletedJobs({ userEmail }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recoveringCode, setRecoveringCode] = useState(null);
+  const [rows, setRows]              = useState([]);
+  const [loading, setLoading]        = useState(true);
+  const [error, setError]            = useState(null);
+  const [recoveringCode, setRecCode] = useState(null);
 
-  const fetch = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllJobs('ADMIN');
@@ -256,11 +269,11 @@ function DeletedJobs({ userEmail }) {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { load(); }, [load]);
 
   const handleRecover = async (job) => {
     if (!window.confirm(`Recover job "${job.jobDesc}"?`)) return;
-    setRecoveringCode(job.jobCode);
+    setRecCode(job.jobCode);
     try {
       const stamp = makeStamp('RECOVERED', userEmail);
       const { error: dbErr } = await supabase
@@ -268,27 +281,25 @@ function DeletedJobs({ userEmail }) {
         .update({ record_status: 'ACTIVE', stamp })
         .eq('jobcode', job.jobCode);
       if (dbErr) throw dbErr;
-      await fetch();
+      await load();
     } catch (err) {
       alert('Failed to recover: ' + err.message);
     } finally {
-      setRecoveringCode(null);
+      setRecCode(null);
     }
   };
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (rows.length === 0) return <EmptyState label="Jobs" />;
+  if (error)   return <ErrorState message={error} />;
+  if (!rows.length) return <EmptyState label="Jobs" />;
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-100">
         <thead className="bg-slate-50">
           <tr>
-            {['Job Code', 'Job Description', 'Stamp', 'Actions'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                {h}
-              </th>
+            {['Job Code','Job Description','Stamp','Actions'].map(h => (
+              <Th key={h}>{h}</Th>
             ))}
           </tr>
         </thead>
@@ -311,13 +322,14 @@ function DeletedJobs({ userEmail }) {
   );
 }
 
+// ─── Tab: Deleted Departments ─────────────────────────────────────────────────
 function DeletedDepartments({ userEmail }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recoveringCode, setRecoveringCode] = useState(null);
+  const [rows, setRows]              = useState([]);
+  const [loading, setLoading]        = useState(true);
+  const [error, setError]            = useState(null);
+  const [recoveringCode, setRecCode] = useState(null);
 
-  const fetch = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllDepartments('ADMIN');
@@ -330,11 +342,11 @@ function DeletedDepartments({ userEmail }) {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { load(); }, [load]);
 
   const handleRecover = async (dept) => {
     if (!window.confirm(`Recover department "${dept.deptName}"?`)) return;
-    setRecoveringCode(dept.deptCode);
+    setRecCode(dept.deptCode);
     try {
       const stamp = makeStamp('RECOVERED', userEmail);
       const { error: dbErr } = await supabase
@@ -342,27 +354,25 @@ function DeletedDepartments({ userEmail }) {
         .update({ record_status: 'ACTIVE', stamp })
         .eq('deptcode', dept.deptCode);
       if (dbErr) throw dbErr;
-      await fetch();
+      await load();
     } catch (err) {
       alert('Failed to recover: ' + err.message);
     } finally {
-      setRecoveringCode(null);
+      setRecCode(null);
     }
   };
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-  if (rows.length === 0) return <EmptyState label="Departments" />;
+  if (error)   return <ErrorState message={error} />;
+  if (!rows.length) return <EmptyState label="Departments" />;
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-100">
         <thead className="bg-slate-50">
           <tr>
-            {['Dept Code', 'Department Name', 'Stamp', 'Actions'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                {h}
-              </th>
+            {['Dept Code','Department Name','Stamp','Actions'].map(h => (
+              <Th key={h}>{h}</Th>
             ))}
           </tr>
         </thead>
@@ -385,12 +395,14 @@ function DeletedDepartments({ userEmail }) {
   );
 }
 
+// ─── Page root ────────────────────────────────────────────────────────────────
 export default function DeletedItems() {
-  const { user } = useAuth();
+  const { user }        = useAuth();
   const [activeTab, setActiveTab] = useState('employees');
 
-  const userType = user?.user_type || 'USER';
+  const userType    = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
+  const userEmail   = user?.email;
 
   if (!isAdminPlus) {
     return (
@@ -407,17 +419,11 @@ export default function DeletedItems() {
     );
   }
 
-  const userEmail = user?.email;
-
-  const tabContent = {
-    employees:   <DeletedEmployees   userEmail={userEmail} />,
-    jobhistory:  <DeletedJobHistory  userEmail={userEmail} />,
-    jobs:        <DeletedJobs        userEmail={userEmail} />,
-    departments: <DeletedDepartments userEmail={userEmail} />,
-  };
-
+  // Render all tab panels but only show the active one.
+  // This keeps each panel's state alive while switching tabs.
   return (
     <div className="p-4 md:p-6">
+      {/* Page header */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-800">Deleted Items</h1>
         <p className="text-sm text-slate-500 mt-0.5">
@@ -425,6 +431,7 @@ export default function DeletedItems() {
         </p>
       </div>
 
+      {/* Tab bar */}
       <div className="flex gap-1 border-b border-slate-200">
         {TABS.map(tab => (
           <button
@@ -441,8 +448,20 @@ export default function DeletedItems() {
         ))}
       </div>
 
+      {/* Tab panels — rendered once, shown/hidden via CSS to preserve state */}
       <div className="bg-white rounded-b-xl rounded-tr-xl shadow-sm border border-t-0 border-slate-200 overflow-hidden">
-        {tabContent[activeTab]}
+        <div className={activeTab === 'employees'   ? '' : 'hidden'}>
+          <DeletedEmployees   userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobhistory'  ? '' : 'hidden'}>
+          <DeletedJobHistory  userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobs'        ? '' : 'hidden'}>
+          <DeletedJobs        userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'departments' ? '' : 'hidden'}>
+          <DeletedDepartments userEmail={userEmail} />
+        </div>
       </div>
     </div>
   );
