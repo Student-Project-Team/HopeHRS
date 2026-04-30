@@ -52,8 +52,11 @@ export default function EmployeeDetailPage() {
   }, [empno]);
 
   // Fetch job history
+  const canView = canViewJobHistory();
+  const canAdd = canAddJobHistory();
+
   const fetchJobHistory = useCallback(async () => {
-    if (!canViewJobHistory() || !empno) return;
+    if (!canView || !empno) return;
 
     setJobHistoryLoading(true);
     try {
@@ -65,7 +68,8 @@ export default function EmployeeDetailPage() {
     } finally {
       setJobHistoryLoading(false);
     }
-  }, [empno, userType, canViewJobHistory]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empno, userType, canView]);
 
   useEffect(() => {
     fetchJobHistory();
@@ -183,11 +187,11 @@ export default function EmployeeDetailPage() {
       </div>
 
       {/* Job History Section */}
-      {canViewJobHistory() && (
+      {canView && (
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
             <h2 className="text-xl font-semibold text-slate-800">Job History</h2>
-            {canAddJobHistory() && employee.record_status === 'ACTIVE' && (
+            {canAdd && employee.record_status === 'ACTIVE' && (
               <button
                 onClick={() => setShowAddForm(true)}
                 className="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition"
@@ -197,10 +201,14 @@ export default function EmployeeDetailPage() {
             )}
           </div>
 
-          {jobHistoryLoading && jobHistory.length === 0 ? (
+          {jobHistoryLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
               <span className="ml-2 text-slate-500">Loading job history...</span>
+            </div>
+          ) : jobHistory.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 px-6 py-12 text-center text-slate-400 text-sm">
+              No job history found
             </div>
           ) : (
             <JobHistoryPanel
