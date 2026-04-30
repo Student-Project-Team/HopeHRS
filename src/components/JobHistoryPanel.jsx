@@ -1,6 +1,6 @@
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLoading = false }) {
   const { user } = useAuth();
@@ -9,11 +9,24 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
+  // FILTER history based on user type
+  const filteredHistory = useMemo(() => {
+    if (!history) return [];
+    
+    // Regular USER: only see ACTIVE records
+    if (!isAdminPlus) {
+      return history.filter(item => item.record_status === 'ACTIVE');
+    }
+    
+    // ADMIN/SUPERADMIN: see all records
+    return history;
+  }, [history, isAdminPlus]);
+
   // Whether the Actions column should render at all
   const showActions = canEditJobHistory() || canDeleteJobHistory();
 
   // Show loading state while fetching
-  if (isLoading && history.length === 0) {
+  if (isLoading && filteredHistory.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
         <div className="flex items-center justify-center gap-2 text-slate-500">
@@ -24,7 +37,7 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
     );
   }
 
-  if (!history || history.length === 0) {
+  if (!filteredHistory || filteredHistory.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">
         <p className="text-sm">No job history records found.</p>
@@ -61,7 +74,7 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {history.map((item, idx) => (
+            {filteredHistory.map((item, idx) => (
               <tr
                 key={item.id ?? idx}
                 className={`hover:bg-slate-50 transition ${
