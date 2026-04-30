@@ -147,7 +147,9 @@ export default function JobListPage() {
                 {isAdminPlus && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
                 )}
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                {isAdminPlus && (
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -156,7 +158,7 @@ export default function JobListPage() {
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-400 text-sm">
                     No jobs found
                   </td>
-                 </tr>
+                </tr>
               ) : (
                 filteredJobs.map((job) => (
                   <tr key={job.jobCode} className="hover:bg-slate-50 transition">
@@ -176,38 +178,40 @@ export default function JobListPage() {
                         {job.stamp || '-'}
                       </td>
                     )}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {/* Edit Job button - JOB_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
-                      {canEditJob() && job.record_status === 'ACTIVE' && (
-                        <button
-                          onClick={() => { setEditingJob(job); setShowEditModal(true); }}
-                          className="text-slate-600 hover:text-slate-800 mr-3 text-sm font-medium transition"
-                        >
-                          Edit
-                        </button>
-                      )}
+                    {isAdminPlus && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {/* Edit Job button - JOB_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
+                        {canEditJob() && job.record_status === 'ACTIVE' && (
+                          <button
+                            onClick={() => { setEditingJob(job); setShowEditModal(true); }}
+                            className="text-slate-600 hover:text-slate-800 mr-3 text-sm font-medium transition"
+                          >
+                            Edit
+                          </button>
+                        )}
 
-                      {/* Delete Job button - JOB_DEL (SUPERADMIN only) - only on ACTIVE records */}
-                      {canDeleteJob() && isSuperAdmin && job.record_status === 'ACTIVE' && (
-                        <button
-                          onClick={() => setDeleteTarget(job)}
-                          className="text-red-600 hover:text-red-700 text-sm font-medium transition"
-                        >
-                          Delete
-                        </button>
-                      )}
+                        {/* Delete Job button - JOB_DEL (SUPERADMIN only) - only on ACTIVE records */}
+                        {canDeleteJob() && isSuperAdmin && job.record_status === 'ACTIVE' && (
+                          <button
+                            onClick={() => setDeleteTarget(job)}
+                            className="text-red-600 hover:text-red-700 text-sm font-medium transition"
+                          >
+                            Delete
+                          </button>
+                        )}
 
-                      {/* Recover Job button - JOB_DEL or ADMIN (ADMIN, SUPERADMIN) - only on INACTIVE records */}
-                      {isAdminPlus && job.record_status === 'INACTIVE' && (
-                        <button
-                          onClick={() => handleRecover(job.jobCode)}
-                          disabled={actionLoading === job.jobCode}
-                          className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition disabled:opacity-50"
-                        >
-                          {actionLoading === job.jobCode ? '...' : 'Recover'}
-                        </button>
-                      )}
-                    </td>
+                        {/* Recover Job button - ADMIN+ - only on INACTIVE records */}
+                        {isAdminPlus && job.record_status === 'INACTIVE' && (
+                          <button
+                            onClick={() => handleRecover(job.jobCode)}
+                            disabled={actionLoading === job.jobCode}
+                            className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition disabled:opacity-50"
+                          >
+                            {actionLoading === job.jobCode ? '...' : 'Recover'}
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

@@ -147,7 +147,9 @@ export default function DeptListPage() {
                 {isAdminPlus && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
                 )}
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                {isAdminPlus && (
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -156,7 +158,7 @@ export default function DeptListPage() {
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-400 text-sm">
                     No departments found
                   </td>
-                 </tr>
+                </tr>
               ) : (
                 filteredDepartments.map((dept) => (
                   <tr key={dept.deptCode} className="hover:bg-slate-50 transition">
@@ -176,38 +178,41 @@ export default function DeptListPage() {
                         {dept.stamp || '-'}
                       </td>
                     )}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {/* Edit Department button - DEPT_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
-                      {canEditDepartment() && dept.record_status === 'ACTIVE' && (
-                        <button
-                          onClick={() => { setEditingDept(dept); setShowEditModal(true); }}
-                          className="text-slate-600 hover:text-slate-800 mr-3 text-sm font-medium transition"
-                        >
-                          Edit
-                        </button>
-                      )}
+                    {/* Actions column - ADMIN+ only */}
+                    {isAdminPlus && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {/* Edit Department button - DEPT_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
+                        {canEditDepartment() && dept.record_status === 'ACTIVE' && (
+                          <button
+                            onClick={() => { setEditingDept(dept); setShowEditModal(true); }}
+                            className="text-slate-600 hover:text-slate-800 mr-3 text-sm font-medium transition"
+                          >
+                            Edit
+                          </button>
+                        )}
 
-                      {/* Delete Department button - DEPT_DEL (SUPERADMIN only) - only on ACTIVE records */}
-                      {canDeleteDepartment() && isSuperAdmin && dept.record_status === 'ACTIVE' && (
-                        <button
-                          onClick={() => setDeleteTarget(dept)}
-                          className="text-red-600 hover:text-red-700 text-sm font-medium transition"
-                        >
-                          Delete
-                        </button>
-                      )}
+                        {/* Delete Department button - DEPT_DEL (SUPERADMIN only) - only on ACTIVE records */}
+                        {canDeleteDepartment() && isSuperAdmin && dept.record_status === 'ACTIVE' && (
+                          <button
+                            onClick={() => setDeleteTarget(dept)}
+                            className="text-red-600 hover:text-red-700 text-sm font-medium transition"
+                          >
+                            Delete
+                          </button>
+                        )}
 
-                      {/* Recover Department button - DEPT_DEL or ADMIN (ADMIN, SUPERADMIN) - only on INACTIVE records */}
-                      {isAdminPlus && dept.record_status === 'INACTIVE' && (
-                        <button
-                          onClick={() => handleRecover(dept.deptCode)}
-                          disabled={actionLoading === dept.deptCode}
-                          className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition disabled:opacity-50"
-                        >
-                          {actionLoading === dept.deptCode ? '...' : 'Recover'}
-                        </button>
-                      )}
-                    </td>
+                        {/* Recover Department button - ADMIN+ - only on INACTIVE records */}
+                        {dept.record_status === 'INACTIVE' && (
+                          <button
+                            onClick={() => handleRecover(dept.deptCode)}
+                            disabled={actionLoading === dept.deptCode}
+                            className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition disabled:opacity-50"
+                          >
+                            {actionLoading === dept.deptCode ? '...' : 'Recover'}
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
