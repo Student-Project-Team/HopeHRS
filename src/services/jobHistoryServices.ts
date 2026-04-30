@@ -1,151 +1,161 @@
 import { supabase } from '../lib/supabase';
 import { makeStamp } from '../utils/stamp';
+import { JobHistoryEntry, CreateJobHistoryData, UpdateJobHistoryData } from '../types/jobHistory';
 
-export async function getJobHistoryByEmployee(empno, userType) {
+export async function getJobHistoryByEmployee(empno: string, userType: 'USER' | 'ADMIN' | 'SUPERADMIN') {
   try {
     let query = supabase
-      .from('jobhistory')
-      .select(`
-        *,
-        job:jobcode (jobdesc),
-        department:deptcode (deptname)
-      `)
-      .eq('empno', empno)
-      .order('effdate', { ascending: false });
+      .from('jobHistory')
+      .select('*')
+      .eq('empNo', empno)
+      .order('effDate', { ascending: false });
+    
+    if (userType === 'USER') {
+      query = query.eq('record_status', 'ACTIVE');
+    }
     
     const { data, error } = await query;
     if (error) throw error;
-
-    const transformedData = data?.map((item) => ({
-      ...item,
-      jobDesc: item.job?.jobdesc,
-      deptName: item.department?.deptname,
-      // Create a composite key for unique identification
-      uniqueId: `${item.empno}-${item.jobcode}-${item.effdate}`
-    })) || [];
-    
-    return transformedData;
+    return { data: data as JobHistoryEntry[], error: null };
   } catch (error) {
     console.error('Error fetching job history:', error);
-    return [];
+    return { data: null, error };
   }
 }
 
-export async function getCurrentJobForEmployee(empno) {
+export async function getCurrentJob(empno: string) {
   try {
     const { data, error } = await supabase
-      .from('jobhistory')
+      .from('jobHistory')
       .select('*')
-      .eq('empno', empno)
+      .eq('empNo', empno)
       .eq('record_status', 'ACTIVE')
-      .order('effdate', { ascending: false })
-      .limit(1);
-
+      .order('effDate', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
     if (error) throw error;
-    return data && data.length > 0 ? data[0] : null;
+    return { data: data as JobHistoryEntry | null, error: null };
   } catch (error) {
     console.error('Error fetching current job:', error);
-    return null;
+    return { data: null, error };
   }
 }
 
-export async function createJobHistory(data, userId) {
+export async function addJobHistoryEntry(data: CreateJobHistoryData, userId: string) {
   try {
+    const { data: existing } = await supabase
+      .from('jobHistory')
+      .select('empNo, jobCode, effDate')
+      .eq('empNo', data.empNo)
+      .eq('jobCode', data.jobCode)
+      .eq('effDate', data.effDate)
+      .maybeSingle();
+    
+    if (existing) {
+      throw new Error('Job history entry already exists');
+    }
+    
+    const newEntry = {
+      ...data,
+      record_status: 'ACTIVE',
+      stamp: makeStamp('CREATED', userId)
+    };
+    
     const { data: result, error } = await supabase
-      .from('jobhistory')
-      .insert([{
-        empno: data.empNo,
-        jobcode: data.jobCode,
-        deptcode: data.deptCode,
-        effdate: data.effDate,
-        record_status: 'ACTIVE',
-        salary: data.salary || null,
-        stamp: makeStamp('CREATED', userId)
-      }])
+      .from('jobHistory')
+      .insert([newEntry])
       .select()
       .single();
-
+    
     if (error) throw error;
-    return result;
+    return { data: result as JobHistoryEntry, error: null };
   } catch (error) {
-    console.error('createJobHistory error:', error);
-    throw error;
+    console.error('Error adding job history:', error);
+    return { data: null, error };
   }
 }
 
-/**
- * Updates a job history record using composite key (empno, jobcode, effdate)
- * Requires JH_EDIT right — enforce on the calling layer.
- */
-export async function updateJobHistory(empno, jobcode, effdate, updates, userId) {
+export async function updateJobHistoryEntry(
+  empno: string, 
+  jobCode: string, 
+  effDate: string, 
+  updates: UpdateJobHistoryData, 
+  userId: string
+) {
   try {
-    const stamp = makeStamp('UPDATED', userId);
+    const updateData = {
+      ...updates,
+      stamp: makeStamp('UPDATED', userId)
+    };
+    
     const { data, error } = await supabase
-      .from('jobhistory')
+      .from('jobHistory')
+      .update(updateData)
+      .eq('empNo', empno)
+      .eq('jobCode', jobCode)
+      .eq('effDate', effDate)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { data: data as JobHistoryEntry, error: null };
+  } catch (error) {
+    console.error('Error updating job history:', error);
+    return { data: null, error };
+  }
+}
+
+export async function softDeleteJobHistoryEntry(
+  empno: string, 
+  jobCode: string, 
+  effDate: string, 
+  userId: string
+) {
+  try {
+    const { data, error } = await supabase
+      .from('jobHistory')
       .update({
-        jobcode: updates.jobCode,
-        deptcode: updates.deptCode,
-        effdate: updates.effDate,
-        salary: updates.salary || null,
-        stamp,
+        record_status: 'INACTIVE',
+        stamp: makeStamp('DEACTIVATED', userId)
       })
-      .eq('empno', empno)
-      .eq('jobcode', jobcode)
-      .eq('effdate', effdate)
+      .eq('empNo', empno)
+      .eq('jobCode', jobCode)
+      .eq('effDate', effDate)
       .select()
       .single();
-
+    
     if (error) throw error;
-    return data;
+    return { data: data as JobHistoryEntry, error: null };
   } catch (error) {
-    console.error('updateJobHistory error:', error);
-    throw error;
+    console.error('Error deleting job history:', error);
+    return { data: null, error };
   }
 }
 
-/**
- * Soft-deletes a job history record using composite key
- * Requires JH_DEL right — enforce on the calling layer.
- */
-export async function softDeleteJobHistory(empno, jobcode, effdate, userId) {
+export async function recoverJobHistoryEntry(
+  empno: string, 
+  jobCode: string, 
+  effDate: string, 
+  userId: string
+) {
   try {
-    const stamp = makeStamp('DEACTIVATED', userId);
     const { data, error } = await supabase
-      .from('jobhistory')
-      .update({ record_status: 'INACTIVE', stamp })
-      .eq('empno', empno)
-      .eq('jobcode', jobcode)
-      .eq('effdate', effdate)
+      .from('jobHistory')
+      .update({
+        record_status: 'ACTIVE',
+        stamp: makeStamp('RECOVERED', userId)
+      })
+      .eq('empNo', empno)
+      .eq('jobCode', jobCode)
+      .eq('effDate', effDate)
       .select()
       .single();
-
+    
     if (error) throw error;
-    return data;
+    return { data: data as JobHistoryEntry, error: null };
   } catch (error) {
-    console.error('softDeleteJobHistory error:', error);
-    throw error;
-  }
-}
-
-/**
- * Recovers a soft-deleted job history record using composite key
- */
-export async function recoverJobHistory(empno, jobcode, effdate, userId) {
-  try {
-    const stamp = makeStamp('RECOVERED', userId);
-    const { data, error } = await supabase
-      .from('jobhistory')
-      .update({ record_status: 'ACTIVE', stamp })
-      .eq('empno', empno)
-      .eq('jobcode', jobcode)
-      .eq('effdate', effdate)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('recoverJobHistory error:', error);
-    throw error;
+    console.error('Error recovering job history:', error);
+    return { data: null, error };
   }
 }
