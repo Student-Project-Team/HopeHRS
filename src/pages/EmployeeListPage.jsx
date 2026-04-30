@@ -83,7 +83,7 @@ export default function EmployeeListPage() {
     await fetchEmployees();
   };
 
-  // EMP_DEL — opens confirm dialog
+  // EMP_DEL — DELETE/DEACTIVATE employee
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -92,12 +92,14 @@ export default function EmployeeListPage() {
       setDeleteTarget(null);
       await fetchEmployees();
     } catch (err) {
+      console.error('Delete error:', err);
       alert('Failed to deactivate employee: ' + err.message);
     } finally {
       setDeleteLoading(false);
     }
   };
 
+  // Recover employee
   const handleRecover = async (empno) => {
     if (!window.confirm('Recover this employee?')) return;
     setActionLoading(empno);
@@ -105,6 +107,7 @@ export default function EmployeeListPage() {
       await recoverEmployee(empno, user?.email);
       await fetchEmployees();
     } catch (err) {
+      console.error('Recover error:', err);
       alert('Failed to recover employee: ' + err.message);
     } finally {
       setActionLoading(null);
@@ -242,6 +245,7 @@ export default function EmployeeListPage() {
                       </button>
                     )}
 
+                    {/* DELETE button - SUPERADMIN only, ACTIVE employees only */}
                     {canDeleteEmployee() && isSuperAdmin && emp.record_status === 'ACTIVE' && (
                       <button
                         onClick={() => setDeleteTarget(emp)}
@@ -251,6 +255,7 @@ export default function EmployeeListPage() {
                       </button>
                     )}
 
+                    {/* RECOVER button - ADMIN+ only, INACTIVE employees only */}
                     {isAdminPlus && emp.record_status === 'INACTIVE' && (
                       <button
                         onClick={() => handleRecover(emp.empno)}
@@ -283,12 +288,13 @@ export default function EmployeeListPage() {
         employee={editEmployee}
       />
 
-      {/* EMP_DEL gated */}
+      {/* EMP_DEL gated - FIXED: Pass employee as item with type 'employee' */}
       <SoftDeleteConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        employee={deleteTarget}
+        item={deleteTarget}
+        itemType="employee"
         loading={deleteLoading}
       />
     </div>
