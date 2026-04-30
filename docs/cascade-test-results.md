@@ -1,16 +1,15 @@
 # Cascade & Visibility Matrix – Sprint 2, PR-02
 
 **Manual Testing Results**  
-**Environment:** localhost:3000  
-**Test Date:** _______________
+**Environment:** localhost:5173  
 
 ---
 
 | Test ID | Description | USER | ADMIN | SUPERADMIN |
 |---------|-------------|------|-------|-------------|
-| TC01 | Soft-delete employee 00001 → job history disappears for USER | PASS | N/A | N/A |
-| TC02 | Soft-delete employee 00001 → ADMIN sees in Deleted Items | N/A | PASS | N/A |
-| TC03 | Recover employee 00001 → job history reappears for USER | PASS | N/A | N/A |
+| TC01 | Soft-delete employee → job history disappears for USER | PASS | N/A | N/A |
+| TC02 | Soft-delete employee → ADMIN/SUPERADMIN sees in Deleted Items | N/A | PASS | PASS |
+| TC03 | Recover employee → job history reappears for USER | PASS | N/A | N/A |
 | TC04 | USER calls getEmployees() without filter → INACTIVE rows hidden from all 4 tables | PASS | N/A | N/A |
 | TC05 | Stamp column ABSENT in all 4 tables for USER | PASS | FAIL | FAIL |
 | TC06 | Stamp column PRESENT in all 4 tables for ADMIN | FAIL | PASS | PASS |
