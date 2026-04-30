@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getEmployeeById } from '../services/employeeService';
-import { getJobHistoryByEmployee, softDeleteJobHistory } from '../services/jobHistoryService';
+import { getJobHistoryByEmployee, softDeleteJobHistory, recoverJobHistory } from '../services/jobHistoryService';
 import JobHistoryPanel from '../components/JobHistoryPanel';
 import AddJobHistoryForm from '../components/AddJobHistoryForm';
 import EditJobHistoryModal from '../components/EditJobHistoryModal';
@@ -21,13 +21,9 @@ export default function EmployeeDetailPage() {
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
   
-  // Use a counter for refreshing instead of key
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // AddJobHistoryForm
   const [showAddForm, setShowAddForm] = useState(false);
-
-  // EditJobHistoryModal
   const [editItem, setEditItem] = useState(null);
 
   const userType = user?.user_type || 'USER';
@@ -55,7 +51,7 @@ export default function EmployeeDetailPage() {
     if (empno) fetchData();
   }, [empno]);
 
-  // Fetch job history - separated from profile fetch to avoid blocking
+  // Fetch job history
   const fetchJobHistory = useCallback(async () => {
     if (!canViewJobHistory() || !empno) return;
 
@@ -71,34 +67,36 @@ export default function EmployeeDetailPage() {
     }
   }, [empno, userType, canViewJobHistory]);
 
-  // Fetch job history when empno changes or refresh is triggered
   useEffect(() => {
     fetchJobHistory();
   }, [fetchJobHistory, refreshTrigger]);
 
-  // Soft-delete a job history record (JH_DEL)
+  // Soft-delete using composite key
   const handleDeleteJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to deactivate this job history record? This can be reversed.')) return;
     try {
-      await softDeleteJobHistory(item.id, user?.email);
+      await softDeleteJobHistory(
+        item.empno, 
+        item.jobcode, 
+        item.effdate, 
+        user?.email
+      );
       triggerRefresh();
     } catch (err) {
       alert('Failed to delete job history: ' + err.message);
     }
   };
 
-  // Recover a soft-deleted job history record (ADMIN+)
+  // Recover using composite key
   const handleRecoverJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to recover this job history record?')) return;
     try {
-      const { supabase } = await import('../lib/supabase');
-      const { makeStamp } = await import('../utils/stamp');
-      const stamp = makeStamp('RECOVERED', user?.email);
-      const { error } = await supabase
-        .from('jobhistory')
-        .update({ record_status: 'ACTIVE', stamp })
-        .eq('id', item.id);
-      if (error) throw error;
+      await recoverJobHistory(
+        item.empno, 
+        item.jobcode, 
+        item.effdate, 
+        user?.email
+      );
       triggerRefresh();
     } catch (err) {
       alert('Failed to recover job history: ' + err.message);
@@ -120,7 +118,6 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="p-4 md:p-6">
-      {/* Back */}
       <button
         onClick={() => navigate('/employees')}
         className="mb-4 text-slate-600 hover:text-slate-800 flex items-center gap-1 text-sm transition"
@@ -200,7 +197,6 @@ export default function EmployeeDetailPage() {
             )}
           </div>
 
-          {/* Show loading state */}
           {jobHistoryLoading && jobHistory.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
@@ -219,7 +215,6 @@ export default function EmployeeDetailPage() {
         </div>
       )}
 
-      {/* Add Job History Modal */}
       <AddJobHistoryForm
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
@@ -230,7 +225,6 @@ export default function EmployeeDetailPage() {
         }}
       />
 
-      {/* Edit Job History Modal */}
       <EditJobHistoryModal
         isOpen={!!editItem}
         item={editItem}
