@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getEmployeeById } from '../services/employeeService';
-import { getJobHistoryByEmployee, softDeleteJobHistory } from '../services/jobHistoryService';
+import { getJobHistoryByEmployee, softDeleteJobHistory, recoverJobHistory } from '../services/jobHistoryService';
 import JobHistoryPanel from '../components/JobHistoryPanel';
 import AddJobHistoryForm from '../components/AddJobHistoryForm';
 import EditJobHistoryModal from '../components/EditJobHistoryModal';
@@ -20,18 +20,18 @@ export default function EmployeeDetailPage() {
 
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // AddJobHistoryForm
   const [showAddForm, setShowAddForm] = useState(false);
-
-  // EditJobHistoryModal
   const [editItem, setEditItem] = useState(null);
 
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
-  const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
+  const triggerRefresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   // Fetch employee profile
   useEffect(() => {
@@ -52,48 +52,51 @@ export default function EmployeeDetailPage() {
   }, [empno]);
 
   // Fetch job history
+  const fetchJobHistory = useCallback(async () => {
+    if (!canViewJobHistory() || !empno) return;
+
+    setJobHistoryLoading(true);
+    try {
+      const data = await getJobHistoryByEmployee(empno, userType);
+      setJobHistory(data || []);
+    } catch (err) {
+      console.error('ERROR fetching job history:', err);
+      setJobHistory([]);
+    } finally {
+      setJobHistoryLoading(false);
+    }
+  }, [empno, userType, canViewJobHistory]);
+
   useEffect(() => {
-    const fetchJobHistory = async () => {
-      if (!canViewJobHistory()) return;
+    fetchJobHistory();
+  }, [fetchJobHistory, refreshTrigger]);
 
-      setJobHistoryLoading(true);
-      try {
-        const data = await getJobHistoryByEmployee(empno, userType);
-        setJobHistory(data || []);
-      } catch (err) {
-        console.error('ERROR fetching job history:', err);
-        setJobHistory([]);
-      } finally {
-        setJobHistoryLoading(false);
-      }
-    };
-
-    if (empno && canViewJobHistory()) fetchJobHistory();
-  }, [empno, userType, canViewJobHistory, refreshKey]);
-
-  // Soft-delete a job history record (JH_DEL)
+  // Soft-delete using composite key
   const handleDeleteJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to deactivate this job history record? This can be reversed.')) return;
     try {
-      await softDeleteJobHistory(item.id, user?.email);
+      await softDeleteJobHistory(
+        item.empno, 
+        item.jobcode, 
+        item.effdate, 
+        user?.email
+      );
       triggerRefresh();
     } catch (err) {
       alert('Failed to delete job history: ' + err.message);
     }
   };
 
-  // Recover a soft-deleted job history record (ADMIN+)
+  // Recover using composite key
   const handleRecoverJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to recover this job history record?')) return;
     try {
-      const { supabase } = await import('../lib/supabase');
-      const { makeStamp } = await import('../utils/stamp');
-      const stamp = makeStamp('RECOVERED', user?.email);
-      const { error } = await supabase
-        .from('jobhistory')
-        .update({ record_status: 'ACTIVE', stamp })
-        .eq('id', item.id);
-      if (error) throw error;
+      await recoverJobHistory(
+        item.empno, 
+        item.jobcode, 
+        item.effdate, 
+        user?.email
+      );
       triggerRefresh();
     } catch (err) {
       alert('Failed to recover job history: ' + err.message);
@@ -115,7 +118,6 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="p-4 md:p-6">
-      {/* Back */}
       <button
         onClick={() => navigate('/employees')}
         className="mb-4 text-slate-600 hover:text-slate-800 flex items-center gap-1 text-sm transition"
@@ -195,7 +197,7 @@ export default function EmployeeDetailPage() {
             )}
           </div>
 
-          {jobHistoryLoading ? (
+          {jobHistoryLoading && jobHistory.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
               <span className="ml-2 text-slate-500">Loading job history...</span>
@@ -207,12 +209,12 @@ export default function EmployeeDetailPage() {
               onEdit={(item) => setEditItem(item)}
               onDelete={handleDeleteJobHistory}
               onRecover={handleRecoverJobHistory}
+              isLoading={jobHistoryLoading}
             />
           )}
         </div>
       )}
 
-      {/* Add Job History Modal */}
       <AddJobHistoryForm
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
@@ -223,7 +225,6 @@ export default function EmployeeDetailPage() {
         }}
       />
 
-      {/* Edit Job History Modal */}
       <EditJobHistoryModal
         isOpen={!!editItem}
         item={editItem}
