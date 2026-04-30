@@ -1,5 +1,24 @@
-export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, employee, loading }) {
-  if (!isOpen || !employee) return null;
+export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, item, itemType, loading }) {
+  if (!isOpen || !item) return null;
+
+  const getItemLabel = () => {
+    if (itemType === 'job') {
+      return `Job: ${item.jobCode} - ${item.jobDesc}`;
+    }
+    if (itemType === 'department') {
+      return `Department: ${item.deptCode} - ${item.deptName}`;
+    }
+    if (itemType === 'employee') {
+      return `${item.firstname} ${item.lastname} (${item.empno})`;
+    }
+    return item.name || item.code || '';
+  };
+
+  const getActionText = () => {
+    if (itemType === 'job') return 'job';
+    if (itemType === 'department') return 'department';
+    return 'employee';
+  };
 
   return (
     <div
@@ -17,16 +36,16 @@ export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, em
           </div>
 
           <h3 className="text-center text-lg font-semibold text-slate-800 mb-1">
-            Deactivate Employee?
+            Deactivate {getActionText()}?
           </h3>
           <p className="text-center text-sm text-slate-500 mb-1">
             You are about to deactivate:
           </p>
           <p className="text-center text-sm font-medium text-slate-700 mb-4">
-            {employee.firstname} {employee.lastname} ({employee.empno})
+            {getItemLabel()}
           </p>
           <p className="text-center text-xs text-slate-400 mb-6">
-            This sets the employee to INACTIVE. This action can be reversed by an ADMIN.
+            This sets the {getActionText()} to INACTIVE. This action can be reversed by an ADMIN.
           </p>
 
           <div className="flex gap-3">

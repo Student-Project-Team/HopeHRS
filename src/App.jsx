@@ -11,10 +11,12 @@ import EmployeeListPage from './pages/EmployeeListPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
-import DeletedItems from './pages/DeletedItems';
 
+// REMOVE THIS LINE - JobHistory is no longer needed
+// const JobHistory = () => <div className="p-6">Job History Page</div>;
 
 const Admin = () => <div className="p-6">Admin Page</div>;
+const DeletedItems = () => <div className="p-6">Deleted Items Page (ADMIN/SUPERADMIN only)</div>;
 
 function App() {
   return (

@@ -1,63 +1,105 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
-export const UserRightsContext = createContext();
+const UserRightsContext = createContext();
 
 export function UserRightsProvider({ children }) {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [rights, setRights] = useState({});
+  const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (authLoading) return;
-
-    if (!user?.email) {
-      setRights({});
-      setLoading(false);
-      return;
-    }
-
     const fetchUserRights = async () => {
+      if (!user?.email) {
+        setRights({});
+        setUserType(null);
+        setLoading(false);
+        return;
+      }
+
       try {
-        setLoading(true);
-        console.log('Fetching rights for email:', user.email);
+        // First, get the user_type from users table
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('email', user.email)
+          .single();
 
-        const { data: rightsData, error } = await supabase
-          .from('usermodule_rights')
-          .select('right_code, right_value')
-          .eq('email', user.email);
+        if (userError) throw userError;
 
-        if (error) throw error;
+        const currentUserType = userData?.user_type || 'USER';
+        setUserType(currentUserType);
 
-        console.log('Raw rights data:', rightsData);
+        // For ADMIN and SUPERADMIN, they have all rights by default
+        if (currentUserType === 'SUPERADMIN') {
+          setRights({
+            EMP_ADD: true,
+            EMP_EDIT: true,
+            EMP_DEL: true,
+            JH_ADD: true,
+            JH_EDIT: true,
+            JH_DEL: true,
+          });
+        } else if (currentUserType === 'ADMIN') {
+          setRights({
+            EMP_ADD: true,
+            EMP_EDIT: true,
+            EMP_DEL: false,  // ADMIN cannot delete employees
+            JH_ADD: true,
+            JH_EDIT: true,
+            JH_DEL: false,   // ADMIN cannot delete job history
+          });
+        } else {
+          // For USER type, fetch specific rights from user_rights table
+          const { data: rightsData, error: rightsError } = await supabase
+            .from('user_rights')
+            .select('right_name')
+            .eq('email', user.email);
 
-        const rightsMap = {};
-        rightsData?.forEach(item => {
-          if (item.right_code) {
-            rightsMap[item.right_code] = item.right_value === 1;
+          if (rightsError) throw rightsError;
+
+          const rightsMap = {};
+          if (rightsData) {
+            rightsData.forEach((item) => {
+              rightsMap[item.right_name] = true;
+            });
           }
-        });
 
-        console.log('Mapped rights:', rightsMap);
-        setRights(rightsMap);
+          // Set default false for all rights if not present
+          setRights({
+            EMP_ADD: rightsMap.EMP_ADD || false,
+            EMP_EDIT: rightsMap.EMP_EDIT || false,
+            EMP_DEL: rightsMap.EMP_DEL || false,
+            JH_ADD: rightsMap.JH_ADD || false,
+            JH_EDIT: rightsMap.JH_EDIT || false,
+            JH_DEL: rightsMap.JH_DEL || false,
+          });
+        }
       } catch (error) {
         console.error('Error fetching user rights:', error);
         setRights({});
+        setUserType('USER');
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserRights();
-  }, [user?.email, authLoading]);
-
-  const hasRight = (rightCode) => rights[rightCode] === true;
+  }, [user]);
 
   return (
-    <UserRightsContext.Provider value={{ rights, loading, hasRight }}>
+    <UserRightsContext.Provider value={{ rights, userType, loading }}>
       {children}
     </UserRightsContext.Provider>
   );
+}
+
+export function useUserRights() {
+  const context = useContext(UserRightsContext);
+  if (!context) {
+    throw new Error('useUserRights must be used within UserRightsProvider');
+  }
+  return context;
 }
