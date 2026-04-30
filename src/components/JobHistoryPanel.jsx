@@ -2,7 +2,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { memo } from 'react';
 
-function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover }) {
+function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLoading = false }) {
   const { user } = useAuth();
   const { canEditJobHistory, canDeleteJobHistory } = useRights();
 
@@ -11,6 +11,18 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover }) {
 
   // Whether the Actions column should render at all
   const showActions = canEditJobHistory() || canDeleteJobHistory();
+
+  // Show loading state while fetching
+  if (isLoading && history.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+        <div className="flex items-center justify-center gap-2 text-slate-500">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
+          <span className="text-sm">Loading job history...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!history || history.length === 0) {
     return (
@@ -122,4 +134,5 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover }) {
   );
 }
 
+// Use memo to prevent unnecessary re-renders
 export default memo(JobHistoryPanel);
