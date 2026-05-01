@@ -75,6 +75,11 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
     try {
       await updateJobHistory(
         item.id,
+      // Use composite key (empno, original jobcode, original effdate) to identify the record
+      await updateJobHistory(
+        item.empno,
+        item.jobcode,
+        item.effdate,
         {
           jobCode: formData.jobCode,
           deptCode: formData.deptCode,
@@ -124,6 +129,7 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           {/* Job */}
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Job <span className="text-red-500">*</span>
@@ -229,4 +235,5 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
       </div>
     </div>
   );
+}
 }

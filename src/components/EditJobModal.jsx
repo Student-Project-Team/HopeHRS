@@ -8,6 +8,7 @@ export default function EditJobModal({ isOpen, onClose, onSave, job }) {
     if (isOpen && job) {
       // Handle both camelCase and lowercase property names
       setJobDesc(job.jobDesc || job.jobdesc || '');
+      setJobDesc(job.jobdesc || job.jobDesc || '');
     }
   }, [isOpen, job]);
 
@@ -24,6 +25,12 @@ export default function EditJobModal({ isOpen, onClose, onSave, job }) {
       onClose();
     } catch (err) {
       alert(err.message || 'Failed to update job');
+    setLoading(true);
+    try {
+      await onSave({ jobDesc });
+      onClose();
+    } catch (err) {
+      alert(err.message);
     } finally {
       setLoading(false);
     }

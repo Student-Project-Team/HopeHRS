@@ -67,6 +67,7 @@ export async function updateJob(jobCode, updates, userId) {
     
     if (error) throw error;
     
+    // Return normalized data
     return {
       jobCode: data.jobcode,
       jobDesc: data.jobdesc,
@@ -117,4 +118,6 @@ export async function recoverJob(jobCode, userId) {
     console.error('recoverJob error:', error);
     throw error;
   }
+}
+}
 }

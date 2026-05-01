@@ -7,6 +7,13 @@ const NAV_ITEMS = [
   { label: 'Departments', path: '/departments', adminOnly: false },
   { label: 'Admin', path: '/admin', adminOnly: true },
   { label: 'Deleted Items', path: '/deleted-items', adminOnly: true },
+  { label: 'Employees', path: '/employees' },
+  { label: 'Jobs', path: '/jobs' },
+  { label: 'Departments', path: '/departments' },
+  { label: 'Admin', path: '/admin' },
+  { label: 'Deleted Items', path: '/deleted-items' },
+  { label: 'Admin', path: '/admin', requiredType: ['ADMIN', 'SUPERADMIN'] },
+  { label: 'Deleted Items', path: '/deleted-items', requiredType: ['ADMIN', 'SUPERADMIN'] },
 ];
 
 export default function Sidebar({ isOpen, activeNav, onNavChange }) {
@@ -17,6 +24,14 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const isAdminOrSuperAdmin = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdminOrSuperAdmin);
+  
+  const userType = user?.user_type || 'USER';
+
+  // Filter nav items based on user permissions
+  const visibleNavItems = NAV_ITEMS.filter(item => {
+    if (!item.requiredType) return true;
+    return item.requiredType.includes(userType);
+  });
 
   const handleNavigation = (label, path) => {
     onNavChange(label);
@@ -29,6 +44,10 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
         {visibleItems.map(({ label, path }) => (
           <button
             key={label}
+        {NAV_ITEMS.map(({ label, path }) => (
+        {visibleNavItems.map(({ label, path }) => (
+          <button 
+            key={label} 
             onClick={() => handleNavigation(label, path)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition text-left
               ${activeNav === label ? 'bg-slate-100 text-slate-700 font-medium' : 'text-slate-500 hover:bg-slate-50'}`}

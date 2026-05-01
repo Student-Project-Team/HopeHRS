@@ -1,0 +1,39 @@
+-- ============================================
+-- PR-01: headcount_by_dept View
+-- ============================================
+
+CREATE OR REPLACE VIEW headcount_by_dept AS
+SELECT 
+    d.deptCode,
+    d.deptName,
+    COUNT(DISTINCT e.empno) AS employee_count
+FROM department d
+LEFT JOIN jobHistory jh ON d.deptCode = jh.deptCode AND jh.record_status = 'ACTIVE'
+LEFT JOIN employee e ON jh.empNo = e.empno AND e.record_status = 'ACTIVE'
+WHERE jh.effDate = (
+    SELECT MAX(effDate) 
+    FROM jobHistory jh2 
+    WHERE jh2.empNo = jh.empNo 
+    AND jh2.record_status = 'ACTIVE'
+)
+GROUP BY d.deptCode, d.deptName
+ORDER BY d.deptCode;
+
+-- ============================================
+-- PR-01: salary_summary_by_job View
+-- ============================================
+
+CREATE OR REPLACE VIEW salary_summary_by_job AS
+SELECT 
+    j.jobCode,
+    j.jobDesc,
+    COUNT(jh.empNo) AS employee_count,
+    MIN(jh.salary) AS min_salary,
+    MAX(jh.salary) AS max_salary,
+    ROUND(AVG(jh.salary), 2) AS avg_salary
+FROM job j
+JOIN jobHistory jh ON j.jobCode = jh.jobCode
+WHERE jh.record_status = 'ACTIVE'
+AND j.record_status = 'ACTIVE'
+GROUP BY j.jobCode, j.jobDesc
+ORDER BY j.jobCode;
