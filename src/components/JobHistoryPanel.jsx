@@ -279,6 +279,7 @@ export default function JobHistoryPanel({ jobHistory, userType, onRefresh }) {
 // Use memo to prevent unnecessary re-renders
 export default memo(JobHistoryPanel);
 export default memo(JobHistoryPanel);
+export default memo(JobHistoryPanel);
             );
           })}
         </tbody>
