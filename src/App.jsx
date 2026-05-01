@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { UserRightsProvider } from './context/UserRightsContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';  // ← Only once
 import ProtectedRoute from './components/ProtectedRoute';
 import DeletedItemsGuard from './components/guards/DeletedItemsGuard';
 import Login from './pages/Login';
@@ -20,6 +22,8 @@ function App() {
   return (
     <AuthProvider>
       <UserRightsProvider>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -36,6 +40,12 @@ function App() {
               <Route path="/jobs" element={<JobListPage />} />
               <Route path="/departments" element={<DeptListPage />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/employees" element={<Employees />} />
+              <Route path="/jobhistory" element={<JobHistory />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/departments" element={<Departments />} />
+              <Route path="/admin" element={<Admin />} />
+              
               <Route path="/deleted-items" element={
                 <DeletedItemsGuard>
                   <DeletedItems />
@@ -46,6 +56,8 @@ function App() {
         </Routes>
       </UserRightsProvider>
     </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
