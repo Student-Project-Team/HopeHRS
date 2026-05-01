@@ -23,8 +23,8 @@
 - Attempted bypass via URL parameter manipulation (?active=false, ?filter=all)
 - USER view still showed only ACTIVE employees from all 4 tables ✓
 - ADMIN with same URL parameters showed INACTIVE employees ✓
-- Confirmed RLS blocks INACTIVE rows even when no ACTIVE filter is applied✓
-- 
+- Confirmed RLS blocks INACTIVE rows even when no ACTIVE filter is applied ✓
+
 **Result: PASS ✓**
 
 ### 4. Stamp visibility
