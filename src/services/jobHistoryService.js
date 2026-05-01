@@ -156,3 +156,11 @@ export async function recoverJobHistoryEntry(empno, jobCode, effDate, userId) {
     return { data: null, error: error.message };
   }
 }
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching job history:', error);
+    return [];
+  }
+}
+
+// Keep other functions...
