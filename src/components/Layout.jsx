@@ -24,14 +24,12 @@ export default function Layout() {
   });
   const [activeNav, setActiveNav] = useState('Employees');
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
       navigate('/login');
     }
   }, [user, loading, navigate]);
 
-  // Handle resize events
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth <= 768;
