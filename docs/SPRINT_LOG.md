@@ -21,7 +21,7 @@
 ### Goals for Sprint 2
 - Build a 51-case rights test matrix (3 user types × 17 rights) with PASS/FAIL results documented in docs/rights-matrix.md
 - Test soft-delete and recovery cascade for employee 00001 across SUPERADMIN, ADMIN, and USER roles
-- Test API bypass: confirm RLS blocks INACTIVE rows even 7without the ACTIVE filter in getEmployees()
+- Test API bypass: confirm RLS blocks INACTIVE rows even without the ACTIVE filter in getEmployees()
 - Test stamp column visibility: absent for USER, present for ADMIN
 - Audit codebase for any .delete() calls on HR tables (must return zero)
 - Complete Sprint 2 log with findings and resolutions
