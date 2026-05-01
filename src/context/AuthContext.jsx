@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -6,6 +7,7 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -23,6 +25,12 @@ export function AuthProvider({ children }) {
           console.log('3. Fetching user data from user table...');
           const { data: userData, error: userError } = await supabase
             .from('user')
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const { data: userData } = await supabase
+            .from('users')
             .select('user_type, record_status')
             .eq('email', session.user.email)
             .maybeSingle();
@@ -41,6 +49,7 @@ export function AuthProvider({ children }) {
           console.log('5. User set in state');
         } else {
           console.log('No session found');
+        } else {
           setUser(null);
         }
       } catch (error) {
@@ -49,6 +58,8 @@ export function AuthProvider({ children }) {
       } finally {
         console.log('6. Setting loading to FALSE');
         setLoading(false);
+        setLoading(false);
+        setInitialized(true);
       }
     };
 
@@ -61,6 +72,11 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         const { data: userData } = await supabase
           .from('user')
+      if (!initialized) return;
+      
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from('users')
           .select('user_type, record_status')
           .eq('email', session.user.email)
           .maybeSingle();
@@ -77,11 +93,9 @@ export function AuthProvider({ children }) {
     });
 
     return () => {
-      if (listener?.subscription) {
-        listener.subscription.unsubscribe();
-      }
+      listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [initialized]);
 
   console.log('AuthProvider - loading:', loading, 'user:', user?.email);
 
