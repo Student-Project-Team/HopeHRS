@@ -5,6 +5,8 @@ const NAV_ITEMS = [
   { label: 'Employees', path: '/employees' },
   { label: 'Jobs', path: '/jobs' },
   { label: 'Departments', path: '/departments' },
+  { label: 'Admin', path: '/admin' },
+  { label: 'Deleted Items', path: '/deleted-items' },
   { label: 'Admin', path: '/admin', requiredType: ['ADMIN', 'SUPERADMIN'] },
   { label: 'Deleted Items', path: '/deleted-items', requiredType: ['ADMIN', 'SUPERADMIN'] },
 ];
@@ -29,6 +31,7 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   return (
     <aside className={`${isOpen ? 'w-52' : 'w-0 overflow-hidden'} transition-all duration-300 bg-white border-r border-slate-200 flex-shrink-0`}>
       <nav className="p-3 space-y-1">
+        {NAV_ITEMS.map(({ label, path }) => (
         {visibleNavItems.map(({ label, path }) => (
           <button 
             key={label} 

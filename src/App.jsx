@@ -13,6 +13,9 @@ import EmployeeListPage from './pages/EmployeeListPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
+
+// REMOVE THIS LINE - JobHistory is no longer needed
+// const JobHistory = () => <div className="p-6">Job History Page</div>;
 import DeletedItems from './pages/DeletedItems'; // ← real component
 
 
@@ -67,6 +70,8 @@ function App() {
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/employees" element={<EmployeeListPage />} />
               <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
+              {/* REMOVE THIS LINE - /jobhistory route */}
+              {/* <Route path="/jobhistory" element={<JobHistory />} /> */}
               <Route path="/jobs" element={<JobListPage />} />
               <Route path="/departments" element={<DeptListPage />} />
               <Route path="/" element={<Navigate to="/employees" replace />} />
