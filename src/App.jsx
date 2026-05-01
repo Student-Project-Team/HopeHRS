@@ -10,6 +10,9 @@ import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
 import Layout from './components/Layout';
 import EmployeeListPage from './pages/EmployeeListPage';
+import EmployeeDetailPage from './pages/EmployeeDetailPage';
+
+// Placeholder pages (to be replaced in future PRs)
 
 // Placeholder pages
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
@@ -32,6 +35,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Navigate to="/employees" replace />} />
             <Route path="/employees" element={<EmployeeListPage />} />
+            <Route path="/employees/:empno" element={<EmployeeDetailPage />} />
             <Route path="/jobhistory" element={<JobHistory />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/departments" element={<Departments />} />
