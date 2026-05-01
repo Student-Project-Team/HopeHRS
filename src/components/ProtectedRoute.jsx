@@ -4,6 +4,9 @@ import { useAuth } from '../hooks/useAuth';
 export default function ProtectedRoute() {
   const { user, loading } = useAuth(); // ADD loading state
 
+  console.log('ProtectedRoute - loading:', loading);
+  console.log('ProtectedRoute - user:', user);
+
   // IMPORTANT: Wait for auth to initialize before checking user
   if (loading) {
     return (
