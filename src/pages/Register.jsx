@@ -96,17 +96,20 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Create account</h1>
-          <p className="text-gray-500 text-sm">Join the HR platform</p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-md p-8">
+        <div className="mb-8 text-center">
+          <div className="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-white text-lg font-bold mx-auto mb-4">
+            HR
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-800 mb-1">Create account</h1>
+          <p className="text-slate-500 text-sm">Join the HR platform</p>
         </div>
 
         <form onSubmit={handleRegister} noValidate>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 First Name
               </label>
               <input
@@ -115,12 +118,12 @@ export default function Register() {
                 value={form.firstName}
                 onChange={handleChange}
                 placeholder="John"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Last Name
               </label>
               <input
@@ -129,14 +132,14 @@ export default function Register() {
                 value={form.lastName}
                 onChange={handleChange}
                 placeholder="Doe"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
                 required
               />
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Username
             </label>
             <input
@@ -145,13 +148,13 @@ export default function Register() {
               value={form.username}
               onChange={handleChange}
               placeholder="johndoe"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Email
             </label>
             <input
@@ -160,13 +163,13 @@ export default function Register() {
               value={form.email}
               onChange={handleChange}
               placeholder="you@company.com"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Password
             </label>
             <input
@@ -175,13 +178,13 @@ export default function Register() {
               value={form.password}
               onChange={handleChange}
               placeholder="Min. 6 characters"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Confirm password
             </label>
             <input
@@ -190,7 +193,7 @@ export default function Register() {
               value={form.confirmPassword}
               onChange={handleChange}
               placeholder="••••••"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
               required
             />
           </div>
@@ -202,7 +205,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+            className="w-full bg-slate-700 hover:bg-slate-800 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -216,14 +219,14 @@ export default function Register() {
         </form>
 
         <div className="flex items-center gap-3 my-5">
-          <hr className="flex-1 border-gray-100" />
-          <span className="text-xs text-gray-400">or continue with</span>
-          <hr className="flex-1 border-gray-100" />
+          <hr className="flex-1 border-slate-200" />
+          <span className="text-xs text-slate-400">or continue with</span>
+          <hr className="flex-1 border-slate-200" />
         </div>
 
         <button
           onClick={handleGoogleRegister}
-          className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+          className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -234,9 +237,9 @@ export default function Register() {
           Register with Google
         </button>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-slate-500 mt-6">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
+          <Link to="/login" className="text-slate-700 hover:underline font-medium">
             Sign in
           </Link>
         </p>

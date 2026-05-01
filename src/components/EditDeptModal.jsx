@@ -1,27 +1,20 @@
 import { useState, useEffect } from 'react';
 
-export default function AddDeptModal({ isOpen, onClose, onSave, editingDept }) {
-  const [deptCode, setDeptCode] = useState('');
+export default function EditDeptModal({ isOpen, onClose, onSave, dept }) {
   const [deptName, setDeptName] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      if (editingDept) {
-        setDeptCode(editingDept.deptcode || editingDept.deptCode || '');
-        setDeptName(editingDept.deptname || editingDept.deptName || '');
-      } else {
-        setDeptCode('');
-        setDeptName('');
-      }
+    if (isOpen && dept) {
+      setDeptName(dept.deptname || dept.deptName || '');
     }
-  }, [isOpen, editingDept]);
+  }, [isOpen, dept]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSave({ deptCode, deptName });
+      await onSave({ deptName });
       onClose();
     } catch (err) {
       alert(err.message);
@@ -39,9 +32,7 @@ export default function AddDeptModal({ isOpen, onClose, onSave, editingDept }) {
     >
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-800">
-            {editingDept ? 'Edit Department' : 'Add Department'}
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-800">Edit Department</h2>
           <button
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
@@ -54,48 +45,26 @@ export default function AddDeptModal({ isOpen, onClose, onSave, editingDept }) {
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Department Code <span className="text-red-500">*</span>
-            </label>
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-bold mb-4">{editingDept ? 'Edit Department' : 'Add Department'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Department Code</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Department Code</label>
             <input
               type="text"
-              value={deptCode}
-              onChange={(e) => setDeptCode(e.target.value.toUpperCase())}
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"
-              placeholder="e.g. HR, IT, FIN"
-              required
-              disabled={!!editingDept}
-              maxLength={4}
+              value={dept?.deptCode || dept?.deptcode || ''}
+              disabled
+              className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-400 bg-slate-50 cursor-not-allowed"
             />
-            {editingDept && (
-              <p className="text-xs text-slate-400 mt-1">Department code cannot be changed when editing</p>
-            )}
+            <p className="text-xs text-slate-400 mt-1">Department code cannot be changed</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Department Name <span className="text-red-500">*</span>
             </label>
-              className="w-full border rounded-lg px-3 py-2"
-              required
-              disabled={!!editingDept}
-              maxLength={3}
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Department Name</label>
             <input
               type="text"
               value={deptName}
               onChange={(e) => setDeptName(e.target.value)}
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"
-              placeholder="e.g. Human Resources, Information Technology"
+              placeholder="e.g. Human Resources"
               required
             />
           </div>
@@ -120,21 +89,12 @@ export default function AddDeptModal({ isOpen, onClose, onSave, editingDept }) {
                   Saving...
                 </>
               ) : (
-                'Save'
+                'Save Changes'
               )}
-              className="w-full border rounded-lg px-3 py-2"
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
 }

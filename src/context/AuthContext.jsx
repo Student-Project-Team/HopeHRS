@@ -7,6 +7,11 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false); // ADD THIS LINE
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -81,6 +86,8 @@ export function AuthProvider({ children }) {
         console.error('Auth error:', error);
         setUser(null);
       } finally {
+        setLoading(false);
+        setInitialized(true); // ADD THIS LINE
         console.log('6. Setting loading to FALSE');
         setLoading(false);
         setLoading(false);
@@ -89,6 +96,10 @@ export function AuthProvider({ children }) {
     };
 
     getUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // ONLY process if already initialized
+      if (!initialized) return; // ADD THIS LINE
   }, []);
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -121,6 +132,7 @@ export function AuthProvider({ children }) {
     return () => {
       listener?.subscription.unsubscribe();
     };
+  }, [initialized]); // ADD initialized to dependency array
   }, [initialized]);
 
   console.log('AuthProvider - loading:', loading, 'user:', user?.email);
