@@ -16,6 +16,7 @@ import DeptListPage from './pages/DeptListPage';
 
 // REMOVE THIS LINE - JobHistory is no longer needed
 // const JobHistory = () => <div className="p-6">Job History Page</div>;
+import DeletedItems from './pages/DeletedItems'; // ← real component
 
 
 // Placeholder pages (to be replaced in future PRs)
@@ -27,7 +28,6 @@ import DeptListPage from './pages/DeptListPage';
 
 const JobHistory = () => <div className="p-6">Job History Page</div>;
 const Admin = () => <div className="p-6">Admin Page</div>;
-const DeletedItems = () => <div className="p-6">Deleted Items Page (ADMIN/SUPERADMIN only)</div>;
 
 function App() {
   return (
@@ -64,7 +64,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/callback" element={<AuthCallback />} />
-          
+
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/login" replace />} />
