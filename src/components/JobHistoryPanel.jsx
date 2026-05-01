@@ -1,5 +1,8 @@
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
+import { memo } from 'react';
+
+function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover }) {
 import { memo, useMemo } from 'react';
 
 function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLoading = false }) {
@@ -9,6 +12,10 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
+  // Whether the Actions column should render at all
+  const showActions = canEditJobHistory() || canDeleteJobHistory();
+
+  if (!history || history.length === 0) {
   // FILTER history based on user type
   const filteredHistory = useMemo(() => {
     if (!history) return [];
@@ -66,6 +73,12 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                 Status
               </th>
+              {/* Stamp column - visible only for ADMIN/SUPERADMIN */}
+              {isAdminPlus && (
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Stamp
+                </th>
+              )}
               {showActions && (
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   Actions
@@ -74,6 +87,7 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
+            {history.map((item, idx) => (
             {filteredHistory.map((item, idx) => (
               <tr
                 key={item.id ?? idx}
@@ -104,6 +118,13 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
                     {item.record_status || 'ACTIVE'}
                   </span>
                 </td>
+
+                {/* Stamp column - visible only for ADMIN/SUPERADMIN */}
+                {isAdminPlus && (
+                  <td className="px-4 py-3 text-xs text-slate-500 max-w-[180px] truncate" title={item.stamp}>
+                    {item.stamp || '-'}
+                  </td>
+                )}
 
                 {showActions && (
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -276,6 +297,7 @@ export default function JobHistoryPanel({ jobHistory, userType, onRefresh }) {
   );
 }
 
+export default memo(JobHistoryPanel);
 // Use memo to prevent unnecessary re-renders
 export default memo(JobHistoryPanel);
 export default memo(JobHistoryPanel);

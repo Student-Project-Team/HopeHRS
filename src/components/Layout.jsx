@@ -86,6 +86,7 @@ export default function Layout() {
     </div>
   );
 }
+}
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';

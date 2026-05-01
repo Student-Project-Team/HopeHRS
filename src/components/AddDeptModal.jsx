@@ -138,3 +138,4 @@ export default function AddDeptModal({ isOpen, onClose, onSave, editingDept }) {
   );
 }
 }
+}

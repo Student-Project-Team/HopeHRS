@@ -13,6 +13,9 @@ import EmployeeListPage from './pages/EmployeeListPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
+import DeletedItems from './pages/DeletedItems';
+
+
 
 // REMOVE THIS LINE - JobHistory is no longer needed
 // const JobHistory = () => <div className="p-6">Job History Page</div>;
