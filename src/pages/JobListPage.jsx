@@ -1,22 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
-import { getAllJobs, createJob, updateJob } from '../services/jobService';
-import AddJobModal from '../components/AddJobModal';
-import EditJobModal from '../components/EditJobModal';
-
-export default function JobListPage() {
-  const { user } = useAuth();
-  const { canAddJob, canEditJob } = useRights();
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingJob, setEditingJob] = useState(null);
-
-  const userType = user?.user_type || 'USER';
-  const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 import { getAllJobs, createJob, updateJob, softDeleteJob, recoverJob } from '../services/jobService';
 import AddJobModal from '../components/AddJobModal';
 import EditJobModal from '../components/EditJobModal';
@@ -188,16 +172,12 @@ export default function JobListPage() {
                 {isAdminPlus && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
                 )}
-                {canEditJob() && (
                 {isAdminPlus && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {jobs.length === 0 ? (
-                <tr>
-                  <td colSpan={isAdminPlus ? 5 : 4} className="px-6 py-12 text-center text-slate-400 text-sm">
               {filteredJobs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-400 text-sm">
@@ -205,7 +185,6 @@ export default function JobListPage() {
                   </td>
                 </tr>
               ) : (
-                jobs.map((job) => (
                 filteredJobs.map((job) => (
                   <tr key={job.jobCode} className="hover:bg-slate-50 transition">
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{job.jobCode}</td>
@@ -220,16 +199,6 @@ export default function JobListPage() {
                       </span>
                     </td>
                     {isAdminPlus && (
-                      <td className="px-6 py-4 text-xs text-slate-500 max-w-[200px] truncate" title={job.stamp}>
-                        {job.stamp || '-'}
-                      </td>
-                    )}
-                    {canEditJob() && (
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {canEditJob() && job.record_status === 'ACTIVE' && (
-                          <button
-                            onClick={() => { setEditingJob(job); setShowEditModal(true); }}
-                            className="text-slate-600 hover:text-slate-800 text-sm font-medium transition"
                       <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[200px]" title={job.stamp}>
                         {job.stamp || '-'}
                       </td>

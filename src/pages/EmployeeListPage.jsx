@@ -33,7 +33,6 @@ import { getAllEmployees } from '../services/employeeService';
 export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { canAddEmployee, canEditEmployee, canDeleteEmployee, isAdminOrSuperAdmin } = useRights();
   const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
 
   const [employees, setEmployees] = useState([]);
@@ -42,9 +41,6 @@ export default function EmployeeListPage() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editEmployee, setEditEmployee] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEmployee, setEditEmployee] = useState(null);       // triggers EditEmployeeModal
@@ -431,7 +427,6 @@ export default function EmployeeListPage() {
                       </button>
                     )}
 
-                    {/* DELETE BUTTON - ONLY SUPERADMIN CAN SEE THIS */}
                     {/* DELETE button - SUPERADMIN only, ACTIVE employees only */}
                     {canDeleteEmployee() && isSuperAdmin && emp.record_status === 'ACTIVE' && (
                       <button
@@ -480,7 +475,6 @@ export default function EmployeeListPage() {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        employee={deleteTarget}
         item={deleteTarget}
         itemType="employee"
         loading={deleteLoading}

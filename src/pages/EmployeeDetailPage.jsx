@@ -1,17 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getEmployeeById } from '../services/employeeService';
-import { 
-  getJobHistoryByEmployee, 
-  softDeleteJobHistory, 
-  recoverJobHistory 
-} from '../services/jobHistoryService';
-import JobHistoryPanel from '../components/JobHistoryPanel';
-import AddJobHistoryForm from '../components/AddJobHistoryForm';
-import EditJobHistoryModal from '../components/EditJobHistoryModal';
 import { getJobHistoryByEmployee, softDeleteJobHistory, recoverJobHistory } from '../services/jobHistoryService';
 import JobHistoryPanel from '../components/JobHistoryPanel';
 import AddJobHistoryForm from '../components/AddJobHistoryForm';
@@ -37,9 +28,6 @@ export default function EmployeeDetailPage() {
 
   const [jobHistory, setJobHistory] = useState([]);
   const [jobHistoryLoading, setJobHistoryLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Modal state
   
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -49,9 +37,6 @@ export default function EmployeeDetailPage() {
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
-  const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
-
-  // Fetch employee profile
   const triggerRefresh = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);
   }, []);
@@ -107,30 +92,6 @@ export default function EmployeeDetailPage() {
   }, [empno]);
 
   // Fetch job history
-  useEffect(() => {
-    const fetchJobHistory = async () => {
-      if (!canViewJobHistory()) return;
-
-      setJobHistoryLoading(true);
-      try {
-        const data = await getJobHistoryByEmployee(empno, userType);
-        setJobHistory(data || []);
-      } catch (err) {
-        console.error('ERROR fetching job history:', err);
-        setJobHistory([]);
-      } finally {
-        setJobHistoryLoading(false);
-      }
-    };
-
-    if (empno && canViewJobHistory()) fetchJobHistory();
-  }, [empno, userType, canViewJobHistory, refreshKey]);
-
-  // Soft-delete a job history record (JH_DEL)
-  const handleDeleteJobHistory = async (item) => {
-    if (!window.confirm('Are you sure you want to deactivate this job history record? This can be reversed.')) return;
-    try {
-      await softDeleteJobHistory(item.empno, item.jobcode, item.effdate, user?.email);
   const canView = canViewJobHistory();
   const canAdd = canAddJobHistory();
 
@@ -170,11 +131,6 @@ export default function EmployeeDetailPage() {
     }
   };
 
-  // Recover a soft-deleted job history record (ADMIN+)
-  const handleRecoverJobHistory = async (item) => {
-    if (!window.confirm('Are you sure you want to recover this job history record?')) return;
-    try {
-      await recoverJobHistory(item.empno, item.jobcode, item.effdate, user?.email);
   // Recover using composite key
   const handleRecoverJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to recover this job history record?')) return;
@@ -206,7 +162,6 @@ export default function EmployeeDetailPage() {
 
   return (
     <div className="p-4 md:p-6">
-      {/* Back button */}
       <button
         onClick={() => navigate('/employees')}
         className="mb-4 text-slate-600 hover:text-slate-800 flex items-center gap-1 text-sm transition"
@@ -262,7 +217,6 @@ export default function EmployeeDetailPage() {
           </div>
         </div>
 
-        {/* Stamp - visible only for ADMIN/SUPERADMIN */}
         {isAdminPlus && employee.stamp && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <p className="text-xs text-slate-400">
@@ -273,11 +227,6 @@ export default function EmployeeDetailPage() {
       </div>
 
       {/* Job History Section */}
-      {canViewJobHistory() && (
-        <div>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-            <h2 className="text-xl font-semibold text-slate-800">Job History</h2>
-            {canAddJobHistory() && employee.record_status === 'ACTIVE' && (
       {canView && (
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
@@ -314,10 +263,6 @@ export default function EmployeeDetailPage() {
         </div>
       )}
 
-      {/* Add Job History Modal */}
-      <AddJobHistoryForm
-        isOpen={showAddForm}
-        onClose={() => setShowAddModal(false)}
       <AddJobHistoryForm
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
@@ -328,7 +273,6 @@ export default function EmployeeDetailPage() {
         }}
       />
 
-      {/* Edit Job History Modal */}
       <EditJobHistoryModal
         isOpen={!!editItem}
         item={editItem}
@@ -340,7 +284,6 @@ export default function EmployeeDetailPage() {
       />
     </div>
   );
-}
 }
     if (empno) {
       fetchData();

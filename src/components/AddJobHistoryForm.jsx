@@ -271,7 +271,6 @@ export default function AddJobHistoryForm({ empno, onSuccess, onCancel }) {
     </div>
   );
 }
-}
   return (
     <div className="bg-gray-50 rounded-lg p-4 mb-4">
       <h3 className="font-semibold mb-3">Add Job History</h3>

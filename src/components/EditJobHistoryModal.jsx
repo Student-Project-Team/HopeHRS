@@ -4,14 +4,6 @@ import { getAllDepartments } from '../services/departmentService';
 import { updateJobHistory } from '../services/jobHistoryService';
 import { useAuth } from '../hooks/useAuth';
 
-/**
- * EditJobHistoryModal
- * Props:
- *   isOpen    — boolean
- *   item      — the job history row being edited (full object from JobHistoryPanel)
- *   onClose   — () => void
- *   onSuccess — () => void  (triggers a refresh in the parent)
- */
 export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }) {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
@@ -25,14 +17,12 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Populate dropdowns when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchJobsAndDepts();
     }
   }, [isOpen]);
 
-  // Pre-fill form when the item changes
   useEffect(() => {
     if (item) {
       setFormData({
@@ -73,8 +63,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
 
     setLoading(true);
     try {
-      await updateJobHistory(
-        item.id,
       // Use composite key (empno, original jobcode, original effdate) to identify the record
       await updateJobHistory(
         item.empno,
@@ -112,7 +100,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
           <h2 className="text-lg font-semibold text-gray-900">Edit Job History</h2>
           <button
@@ -126,9 +113,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-          {/* Job */}
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -151,7 +135,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
             </select>
           </div>
 
-          {/* Department */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Department <span className="text-red-500">*</span>
@@ -173,7 +156,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
             </select>
           </div>
 
-          {/* Effective Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Effective Date <span className="text-red-500">*</span>
@@ -189,7 +171,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
             />
           </div>
 
-          {/* Salary */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Salary</label>
             <input
@@ -235,5 +216,4 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
       </div>
     </div>
   );
-}
 }

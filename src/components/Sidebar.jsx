@@ -2,11 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
-  { label: 'Employees', path: '/employees', adminOnly: false },
-  { label: 'Jobs', path: '/jobs', adminOnly: false },
-  { label: 'Departments', path: '/departments', adminOnly: false },
-  { label: 'Admin', path: '/admin', adminOnly: true },
-  { label: 'Deleted Items', path: '/deleted-items', adminOnly: true },
   { label: 'Employees', path: '/employees' },
   { label: 'Jobs', path: '/jobs' },
   { label: 'Departments', path: '/departments' },
@@ -19,11 +14,6 @@ const NAV_ITEMS = [
 export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const userType = user?.user_type || 'USER';
-  const isAdminOrSuperAdmin = userType === 'ADMIN' || userType === 'SUPERADMIN';
-
-  const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdminOrSuperAdmin);
   
   const userType = user?.user_type || 'USER';
 
@@ -41,9 +31,6 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   return (
     <aside className={`${isOpen ? 'w-52' : 'w-0 overflow-hidden'} transition-all duration-300 bg-white border-r border-slate-200 flex-shrink-0`}>
       <nav className="p-3 space-y-1">
-        {visibleItems.map(({ label, path }) => (
-          <button
-            key={label}
         {NAV_ITEMS.map(({ label, path }) => (
         {visibleNavItems.map(({ label, path }) => (
           <button 

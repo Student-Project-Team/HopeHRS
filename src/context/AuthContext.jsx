@@ -10,12 +10,6 @@ export function AuthProvider({ children }) {
   const [initialized, setInitialized] = useState(false); // ADD THIS LINE
 
   useEffect(() => {
-    const getInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          const { data: userData, error } = await supabase
     const getUser = async () => {
       try {
   const [initialized, setInitialized] = useState(false);
@@ -71,15 +65,6 @@ export function AuthProvider({ children }) {
             .eq('email', session.user.email)
             .maybeSingle();
           
-          if (error) {
-            console.error('Error fetching user data:', error);
-          }
-          
-          setUser({
-            ...session.user,
-            user_type: userData?.user_type || 'USER',
-            record_status: userData?.record_status || 'INACTIVE'
-          });
           if (userError) {
             console.error('User table error:', userError);
           }
@@ -102,38 +87,6 @@ export function AuthProvider({ children }) {
         setUser(null);
       } finally {
         setLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          const { data: userData, error } = await supabase
-            .from('users')
-            .select('user_type, record_status')
-            .eq('email', session.user.email)
-            .maybeSingle();
-          
-          if (error) {
-            console.error('Error fetching user data on auth change:', error);
-          }
-          
-          setUser({
-            ...session.user,
-            user_type: userData?.user_type || 'USER',
-            record_status: userData?.record_status || 'INACTIVE'
-          });
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
         setInitialized(true); // ADD THIS LINE
         console.log('6. Setting loading to FALSE');
         setLoading(false);
