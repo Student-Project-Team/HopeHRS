@@ -59,6 +59,11 @@ export function useRights() {
     return rights?.JH_DEL === true;
   };
 
+  // ADD THIS - Admin Module rights
+  const canManageUsers = () => {
+    return userType === 'SUPERADMIN';  // Only SUPERADMIN can manage users
+  };
+
   return {
     // Job rights
     canAddJob,
@@ -77,5 +82,7 @@ export function useRights() {
     canAddJobHistory,
     canEditJobHistory,
     canDeleteJobHistory,
+    // Admin rights
+    canManageUsers,  // ← ADD THIS
   };
 }
