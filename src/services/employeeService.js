@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { makeStamp } from '../utils/stamp';
 
 export async function getAllEmployees(userType) {
   try {
@@ -21,7 +22,7 @@ export async function getEmployeeById(empno) {
       .from('employee')
       .select('*')
       .eq('empno', empno)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   } catch (error) {
@@ -37,10 +38,10 @@ export async function createEmployee(data, userId) {
       .insert({
         ...data,
         record_status: 'ACTIVE',
-        stamp: `CREATED by ${userId} on ${new Date().toISOString()}`
+        stamp: makeStamp('CREATED', userId)
       })
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return created;
   } catch (error) {
@@ -55,11 +56,11 @@ export async function updateEmployee(empno, updates, userId) {
       .from('employee')
       .update({
         ...updates,
-        stamp: `UPDATED by ${userId} on ${new Date().toISOString()}`
+        stamp: makeStamp('UPDATED', userId)
       })
       .eq('empno', empno)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   } catch (error) {
@@ -74,11 +75,11 @@ export async function softDeleteEmployee(empno, userId) {
       .from('employee')
       .update({
         record_status: 'INACTIVE',
-        stamp: `DEACTIVATED by ${userId} on ${new Date().toISOString()}`
+        stamp: makeStamp('DEACTIVATED', userId)
       })
       .eq('empno', empno)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   } catch (error) {
@@ -93,11 +94,11 @@ export async function recoverEmployee(empno, userId) {
       .from('employee')
       .update({
         record_status: 'ACTIVE',
-        stamp: `RECOVERED by ${userId} on ${new Date().toISOString()}`
+        stamp: makeStamp('RECOVERED', userId)
       })
       .eq('empno', empno)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   } catch (error) {
