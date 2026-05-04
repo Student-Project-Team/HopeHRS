@@ -14,6 +14,15 @@ const TABS = [
   { id: 'departments', label: 'Departments' },
 ];
 
+// ─── Th helper ────────────────────────────────────────────────────────────────
+function Th({ children }) {
+  return (
+    <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+      {children}
+    </th>
+  );
+}
+
 // ─── Shared UI pieces ──────────────────────────────────────────────────────────
 function EmptyState({ label }) {
   return (
@@ -72,20 +81,12 @@ function RecoverButton({ onClick, loading }) {
   );
 }
 
-function Th({ children }) {
-  return (
-    <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
-      {children}
-    </th>
-  );
-}
-
 // ─── Tab: Deleted Employees ────────────────────────────────────────────────────
 function DeletedEmployees({ userEmail }) {
-  const [rows, setRows]           = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
-  const [recoveringId, setRecId]  = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [recoveringId, setRecId] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -116,7 +117,7 @@ function DeletedEmployees({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} />;
   if (!rows.length) return <EmptyState label="Employees" />;
 
   return (
@@ -127,7 +128,7 @@ function DeletedEmployees({ userEmail }) {
             {['Emp No', 'Last Name', 'First Name', 'Gender', 'Hire Date', 'Sep Date', 'Stamp', 'Actions'].map(h => (
               <Th key={h}>{h}</Th>
             ))}
-          </tr>
+           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
           {rows.map(emp => (
@@ -136,7 +137,7 @@ function DeletedEmployees({ userEmail }) {
                 <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                   {emp.empno}
                 </span>
-              </td>
+               </td>
               <td className="px-3 py-3 text-xs font-semibold text-slate-700 truncate">{emp.lastname}</td>
               <td className="px-3 py-3 text-xs text-slate-600 truncate">{emp.firstname}</td>
               <td className="px-3 py-3 text-xs text-slate-500">{emp.gender}</td>
@@ -156,9 +157,9 @@ function DeletedEmployees({ userEmail }) {
 
 // ─── Tab: Deleted Job History ─────────────────────────────────────────────────
 function DeletedJobHistory({ userEmail }) {
-  const [rows, setRows]            = useState([]);
-  const [loading, setLoading]      = useState(true);
-  const [error, setError]          = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringKey, setRecKey] = useState(null);
 
   const load = useCallback(async () => {
@@ -197,7 +198,7 @@ function DeletedJobHistory({ userEmail }) {
       const { error: dbErr } = await supabase
         .from('jobhistory')
         .update({ record_status: 'ACTIVE', stamp })
-        .eq('empno',   item.empno)
+        .eq('empno', item.empno)
         .eq('jobcode', item.jobcode)
         .eq('effdate', item.effdate);
       if (dbErr) throw dbErr;
@@ -210,7 +211,7 @@ function DeletedJobHistory({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} />;
   if (!rows.length) return <EmptyState label="Job History" />;
 
   return (
@@ -221,7 +222,7 @@ function DeletedJobHistory({ userEmail }) {
             {['Emp No', 'Job Title', 'Department', 'Eff Date', 'Salary', 'Stamp', 'Actions'].map(h => (
               <Th key={h}>{h}</Th>
             ))}
-          </tr>
+           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
           {rows.map(item => (
@@ -251,9 +252,9 @@ function DeletedJobHistory({ userEmail }) {
 
 // ─── Tab: Deleted Jobs ────────────────────────────────────────────────────────
 function DeletedJobs({ userEmail }) {
-  const [rows, setRows]              = useState([]);
-  const [loading, setLoading]        = useState(true);
-  const [error, setError]            = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringCode, setRecCode] = useState(null);
 
   const load = useCallback(async () => {
@@ -290,7 +291,7 @@ function DeletedJobs({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} />;
   if (!rows.length) return <EmptyState label="Jobs" />;
 
   return (
@@ -301,7 +302,7 @@ function DeletedJobs({ userEmail }) {
             {['Job Code', 'Job Description', 'Stamp', 'Actions'].map(h => (
               <Th key={h}>{h}</Th>
             ))}
-          </tr>
+           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
           {rows.map(job => (
@@ -326,9 +327,9 @@ function DeletedJobs({ userEmail }) {
 
 // ─── Tab: Deleted Departments ─────────────────────────────────────────────────
 function DeletedDepartments({ userEmail }) {
-  const [rows, setRows]              = useState([]);
-  const [loading, setLoading]        = useState(true);
-  const [error, setError]            = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringCode, setRecCode] = useState(null);
 
   const load = useCallback(async () => {
@@ -365,7 +366,7 @@ function DeletedDepartments({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} />;
   if (!rows.length) return <EmptyState label="Departments" />;
 
   return (
@@ -376,7 +377,7 @@ function DeletedDepartments({ userEmail }) {
             {['Dept Code', 'Department Name', 'Stamp', 'Actions'].map(h => (
               <Th key={h}>{h}</Th>
             ))}
-          </tr>
+           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
           {rows.map(dept => (
@@ -401,12 +402,12 @@ function DeletedDepartments({ userEmail }) {
 
 // ─── Page root ────────────────────────────────────────────────────────────────
 export default function DeletedItems() {
-  const { user }        = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('employees');
 
-  const userType    = user?.user_type || 'USER';
+  const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
-  const userEmail   = user?.email;
+  const userEmail = user?.email;
 
   if (!isAdminPlus) {
     return (
@@ -452,12 +453,20 @@ export default function DeletedItems() {
         ))}
       </div>
 
-      {/* Tab panels */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden w-full mt-4">
-        <div className={activeTab === 'employees'   ? '' : 'hidden'}><DeletedEmployees   userEmail={userEmail} /></div>
-        <div className={activeTab === 'jobhistory'  ? '' : 'hidden'}><DeletedJobHistory  userEmail={userEmail} /></div>
-        <div className={activeTab === 'jobs'        ? '' : 'hidden'}><DeletedJobs        userEmail={userEmail} /></div>
-        <div className={activeTab === 'departments' ? '' : 'hidden'}><DeletedDepartments userEmail={userEmail} /></div>
+      {/* Tab panels — rendered once, shown/hidden via CSS to preserve state */}
+      <div className="bg-white rounded-b-xl rounded-tr-xl shadow-sm border border-t-0 border-slate-200 overflow-hidden">
+        <div className={activeTab === 'employees' ? '' : 'hidden'}>
+          <DeletedEmployees userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobhistory' ? '' : 'hidden'}>
+          <DeletedJobHistory userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobs' ? '' : 'hidden'}>
+          <DeletedJobs userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'departments' ? '' : 'hidden'}>
+          <DeletedDepartments userEmail={userEmail} />
+        </div>
       </div>
     </div>
   );

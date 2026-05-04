@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
-const UserRightsContext = createContext();
+export const UserRightsContext = createContext();
 
 const RIGHTS_BY_TYPE = {
   SUPERADMIN: {
@@ -70,7 +70,13 @@ export function UserRightsProvider({ children }) {
     }
   }, [user?.email, authLoading]);
 
-  const hasRight = (rightCode) => rights[rightCode] === true;
+  const hasRight = (rightCode) => {
+    // SUPERADMIN has all rights
+    if (userType === 'SUPERADMIN') {
+      return true;
+    }
+    return rights[rightCode] === true;
+  };
 
   const value = {
     rights,

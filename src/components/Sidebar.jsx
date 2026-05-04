@@ -50,6 +50,8 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
     return true;
   });
 
+  console.log('  visibleNavItems:', visibleNavItems.map(i => i.label));
+
   const handleNavigation = (label, path) => {
     onNavChange(label);
     navigate(path);

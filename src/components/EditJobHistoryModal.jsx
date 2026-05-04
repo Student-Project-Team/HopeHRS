@@ -4,6 +4,14 @@ import { getAllDepartments } from '../services/departmentService';
 import { updateJobHistory } from '../services/jobHistoryService';
 import { useAuth } from '../hooks/useAuth';
 
+/**
+ * EditJobHistoryModal
+ * Props:
+ *   isOpen    — boolean
+ *   item      — the job history row being edited (full object from JobHistoryPanel)
+ *   onClose   — () => void
+ *   onSuccess — () => void  (triggers a refresh in the parent)
+ */
 export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }) {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
@@ -17,12 +25,14 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Populate dropdowns when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchJobsAndDepts();
     }
   }, [isOpen]);
 
+  // Pre-fill form when the item changes
   useEffect(() => {
     if (item) {
       setFormData({
@@ -104,7 +114,6 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-slate-100">
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
           <div className="flex items-center gap-2.5">
@@ -126,8 +135,8 @@ export default function EditJobHistoryModal({ isOpen, item, onClose, onSuccess }
           </button>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-
           {/* Job */}
           <div>
             <label className={labelClass}>
