@@ -11,13 +11,16 @@ import EmployeeListPage from './pages/EmployeeListPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import JobListPage from './pages/JobListPage';
 import DeptListPage from './pages/DeptListPage';
-import AdminPage from './pages/AdminPage';  // ← ADD THIS IMPORT
+import AdminPage from './pages/AdminPage';
 import DeletedItems from './pages/DeletedItems';
+
+// NEW IMPORTS for reports
+import HeadcountByDeptPage from './pages/HeadcountByDeptPage';
+import SalaryReportPage from './pages/SalaryReportPage';
+import EmployeeHistoryReportPage from './pages/EmployeeHistoryReportPage';
 
 // Placeholder pages (to be replaced in future PRs)
 const JobHistory = () => <div className="p-6">Job History Page</div>;
-// REMOVE the placeholder Admin - we're using real component now
-// const Admin = () => <div className="p-6">Admin Page</div>;
 
 function App() {
   return (
@@ -36,7 +39,13 @@ function App() {
               <Route path="/jobhistory" element={<JobHistory />} />
               <Route path="/jobs" element={<JobListPage />} />
               <Route path="/departments" element={<DeptListPage />} />
-              <Route path="/admin" element={<AdminPage />} />  {/* ← CHANGED to real component */}
+              <Route path="/admin" element={<AdminPage />} />
+              
+              {/* NEW REPORT ROUTES */}
+              <Route path="/reports/headcount" element={<HeadcountByDeptPage />} />
+              <Route path="/reports/salary" element={<SalaryReportPage />} />
+              <Route path="/reports/employee-history" element={<EmployeeHistoryReportPage />} />
+              
               <Route path="/deleted-items" element={
                 <DeletedItemsGuard>
                   <DeletedItems />
