@@ -1,7 +1,4 @@
 // hooks/useRights.js
-import { useContext, useMemo } from 'react';
-import { UserRightsContext } from '../context/UserRightsContext';
-import { useAuth } from './useAuth';
 import { useUserRights } from '../context/UserRightsContext';
 
 export function useRights() {
@@ -63,9 +60,9 @@ export function useRights() {
     return rights?.JH_DEL === true;
   };
 
-  // Admin Module rights - ADMIN and SUPERADMIN can manage users
+  // Admin Module rights - ONLY SUPERADMIN can manage users (per Development Guide)
   const canManageUsers = () => {
-    return userType === 'ADMIN' || userType === 'SUPERADMIN';
+    return userType === 'SUPERADMIN';  // ✅ FIXED: ADMIN cannot manage users
   };
 
   return {

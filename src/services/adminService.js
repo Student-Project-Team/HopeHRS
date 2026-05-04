@@ -43,6 +43,7 @@ export async function getUserByEmail(email) {
  * Activate a user account
  * Sets record_status = 'ACTIVE'
  * BLOCKED for SUPERADMIN accounts
+ * ONLY SUPERADMIN can activate users (not ADMIN)
  */
 export async function activateUser(email, currentUserEmail) {
   try {
@@ -60,7 +61,7 @@ export async function activateUser(email, currentUserEmail) {
       throw new Error('SUPERADMIN accounts cannot be modified');
     }
 
-    // Check if current user has permission (ADM_USER right)
+    // Check if current user has permission - ONLY SUPERADMIN can activate
     const { data: currentUser, error: permError } = await supabase
       .from('users')
       .select('user_type')
@@ -69,9 +70,9 @@ export async function activateUser(email, currentUserEmail) {
 
     if (permError) throw permError;
 
-    // Only ADMIN and SUPERADMIN can activate users
-    if (currentUser?.user_type !== 'ADMIN' && currentUser?.user_type !== 'SUPERADMIN') {
-      throw new Error('You do not have permission to activate users');
+    // ONLY SUPERADMIN can activate users (per Development Guide)
+    if (currentUser?.user_type !== 'SUPERADMIN') {
+      throw new Error('Only SUPERADMIN can activate users');
     }
 
     const stamp = `ACTIVATED by ${currentUserEmail} on ${new Date().toISOString()}`;
@@ -98,6 +99,7 @@ export async function activateUser(email, currentUserEmail) {
  * Deactivate a user account
  * Sets record_status = 'INACTIVE'
  * BLOCKED for SUPERADMIN accounts
+ * ONLY SUPERADMIN can deactivate users (not ADMIN)
  */
 export async function deactivateUser(email, currentUserEmail) {
   try {
@@ -115,7 +117,7 @@ export async function deactivateUser(email, currentUserEmail) {
       throw new Error('SUPERADMIN accounts cannot be modified');
     }
 
-    // Check if current user has permission (ADM_USER right)
+    // Check if current user has permission - ONLY SUPERADMIN can deactivate
     const { data: currentUser, error: permError } = await supabase
       .from('users')
       .select('user_type')
@@ -124,9 +126,9 @@ export async function deactivateUser(email, currentUserEmail) {
 
     if (permError) throw permError;
 
-    // Only ADMIN and SUPERADMIN can deactivate users
-    if (currentUser?.user_type !== 'ADMIN' && currentUser?.user_type !== 'SUPERADMIN') {
-      throw new Error('You do not have permission to deactivate users');
+    // ONLY SUPERADMIN can deactivate users (per Development Guide)
+    if (currentUser?.user_type !== 'SUPERADMIN') {
+      throw new Error('Only SUPERADMIN can deactivate users');
     }
 
     const stamp = `DEACTIVATED by ${currentUserEmail} on ${new Date().toISOString()}`;
@@ -153,6 +155,7 @@ export async function deactivateUser(email, currentUserEmail) {
  * Change user type (ADMIN, USER)
  * BLOCKED for SUPERADMIN accounts
  * BLOCKED from changing to/from SUPERADMIN
+ * ONLY SUPERADMIN can change user types
  */
 export async function changeUserType(email, newUserType, currentUserEmail) {
   try {
