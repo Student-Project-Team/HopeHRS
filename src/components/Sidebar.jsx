@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 
@@ -18,16 +19,31 @@ const NAV_ITEMS = [
       { label: 'Employee History', path: '/reports/employee-history' },
     ]
   },
-  { label: 'Admin', path: '/admin', requiredType: ['ADMIN', 'SUPERADMIN'] },
+  { label: 'Admin', path: '/admin', requiresAdminAccess: true },  // ← GAMITIN ANG IYONG VERSION
   { label: 'Deleted Items', path: '/deleted-items', requiredType: ['ADMIN', 'SUPERADMIN'] },
 ];
 
 export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canManageUsers, userType } = useRights(); // ← IYONG CODE
+  
+  const [expandedSections, setExpandedSections] = useState({ Reports: true });
 
-  // Filter nav items based on user permissions
+  // IYONG CODE - Admin access check using rights system
+  const hasAdminAccess = canManageUsers();
+
+  const toggleSection = (label) => {
+    setExpandedSections(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  // Filter nav items based on user permissions (COMBINED LOGIC)
   const visibleNavItems = NAV_ITEMS.filter(item => {
+    // IYONG LOGIC para sa Admin link
+    if (item.requiresAdminAccess) {
+      return hasAdminAccess;
+    }
+    // UI's LOGIC para sa lahat ng iba
     if (item.requiredType) {
       return item.requiredType.includes(user?.user_type || 'USER');
     }
@@ -37,12 +53,6 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const handleNavigation = (label, path) => {
     onNavChange(label);
     navigate(path);
-  };
-
-  const [expandedSections, setExpandedSections] = useState({ Reports: true });
-
-  const toggleSection = (label) => {
-    setExpandedSections(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
   return (
@@ -56,6 +66,9 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
           <div className="space-y-0.5">
             {visibleNavItems.map((item) => {
               if (item.isSection) {
+                const hasAccess = !item.requiredType || item.requiredType.includes(user?.user_type || 'USER');
+                if (!hasAccess) return null;
+                
                 return (
                   <div key={item.label} className="mt-4 first:mt-0">
                     <button
@@ -126,3 +139,4 @@ export default function Sidebar({ isOpen, activeNav, onNavChange }) {
     </aside>
   );
 }
+
