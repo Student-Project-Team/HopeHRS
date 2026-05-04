@@ -46,48 +46,67 @@ HopeHRS is a comprehensive web-based Human Resource Management System designed t
 
 ## 📁 Project Structure
 
-HopeHRS/
-├── src/
-│ ├── components/ # Reusable UI components
-│ │ ├── AddEmployeeModal.jsx
-│ │ ├── EditEmployeeModal.jsx
-│ │ ├── JobHistoryPanel.jsx
-│ │ ├── Layout.jsx
-│ │ ├── Navbar.jsx
-│ │ ├── Sidebar.jsx
-│ │ ├── ProtectedRoute.jsx
-│ │ └── SoftDeleteConfirmDialog.jsx
-│ ├── pages/ # Main pages
-│ │ ├── EmployeeListPage.jsx
-│ │ ├── EmployeeDetailPage.jsx
-│ │ ├── JobListPage.jsx
-│ │ ├── DeptListPage.jsx
-│ │ ├── DeletedItems.jsx
-│ │ ├── AdminPage.jsx
-│ │ ├── Login.jsx
-│ │ ├── Register.jsx
-│ │ └── AuthCallback.jsx
-│ ├── context/ # React Context providers
-│ │ ├── AuthContext.jsx
-│ │ └── UserRightsContext.jsx
-│ ├── hooks/ # Custom React hooks
-│ │ ├── useAuth.js
-│ │ ├── useRights.js
-│ │ ├── useAdmin.js
-│ │ └── useReports.js
-│ ├── services/ # API service functions
-│ │ ├── employeeService.js
-│ │ ├── jobHistoryService.js
-│ │ ├── jobService.js
-│ │ ├── departmentService.js
-│ │ ├── adminService.js
-│ │ └── reportService.js
-│ ├── lib/ # Configuration
-│ │ └── supabase.js
-│ └── utils/ # Utility functions
-│ └── stamp.js
-├── public/ # Static assets
-├── vercel.json # Vercel deployment config
-├── vite.config.js # Vite configuration
-├── tailwind.config.js # Tailwind CSS config
-└── package.json # Dependencies and scripts
+## 📁 Project Structure
+
+### Root Directory
+- `vercel.json` - Vercel deployment configuration
+- `vite.config.js` - Vite build configuration
+- `tailwind.config.js` - Tailwind CSS configuration
+- `package.json` - Dependencies and scripts
+- `index.html` - Main HTML entry point
+
+### src/
+- **components/** - Reusable UI components
+  - `AddEmployeeModal.jsx`
+  - `EditEmployeeModal.jsx`
+  - `JobHistoryPanel.jsx`
+  - `Layout.jsx`
+  - `Navbar.jsx`
+  - `Sidebar.jsx`
+  - `ProtectedRoute.jsx`
+  - `SoftDeleteConfirmDialog.jsx`
+  - `guards/DeletedItemsGuard.jsx`
+
+- **pages/** - Main application pages
+  - `Login.jsx`
+  - `Register.jsx`
+  - `AuthCallback.jsx`
+  - `EmployeeListPage.jsx`
+  - `EmployeeDetailPage.jsx`
+  - `JobListPage.jsx`
+  - `DeptListPage.jsx`
+  - `DeletedItems.jsx`
+  - `AdminPage.jsx`
+
+- **context/** - React Context providers
+  - `AuthContext.jsx`
+  - `UserRightsContext.jsx`
+
+- **hooks/** - Custom React hooks
+  - `useAuth.js`
+  - `useRights.js`
+  - `useAdmin.js`
+  - `useReports.js`
+
+- **services/** - API service layer
+  - `employeeService.js`
+  - `jobHistoryService.js`
+  - `jobService.js`
+  - `departmentService.js`
+  - `adminService.js`
+  - `reportService.js`
+
+- **lib/** - Configuration
+  - `supabase.js`
+
+- **utils/** - Utility functions
+  - `stamp.js`
+
+- **assets/** - Static images
+  - `hero.png`
+  - `react.svg`
+
+### public/
+- `favicon.svg`
+- `icons.svg`
+
