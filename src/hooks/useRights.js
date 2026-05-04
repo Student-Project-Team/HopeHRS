@@ -63,27 +63,34 @@ export function useRights() {
     return rights?.JH_DEL === true;
   };
 
-  // FIXED: Admin Module rights - ADMIN and SUPERADMIN can manage users
+  // Admin Module rights - ADMIN and SUPERADMIN can manage users
   const canManageUsers = () => {
-    return userType === 'ADMIN' || userType === 'SUPERADMIN';  // ← CHANGED THIS LINE
+    return userType === 'ADMIN' || userType === 'SUPERADMIN';
   };
 
   return {
     // Job rights
-    canViewJobs: () => isAdminOrSuperAdmin || hasRight('JOB_VIEW'),
-    canAddJob: () => (isAdminOrSuperAdmin || hasRight('JOB_ADD')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
-    canEditJob: () => (isAdminOrSuperAdmin || hasRight('JOB_EDIT')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
-    canDeleteJob: () => (isSuperAdmin || hasRight('JOB_DEL')) && (dbUserTypeValue === 'SUPERADMIN'),
+    canAddJob,
+    canEditJob,
+    canDeleteJob,
     
     // Department rights
-    canViewDepartments: () => isAdminOrSuperAdmin || hasRight('DEPT_VIEW'),
-    canAddDepartment: () => (isAdminOrSuperAdmin || hasRight('DEPT_ADD')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
-    canEditDepartment: () => (isAdminOrSuperAdmin || hasRight('DEPT_EDIT')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
-    canDeleteDepartment: () => (isSuperAdmin || hasRight('DEPT_DEL')) && (dbUserTypeValue === 'SUPERADMIN'),
+    canAddDepartment,
+    canEditDepartment,
+    canDeleteDepartment,
+    
+    // Employee rights
+    canAddEmployee,
+    canEditEmployee,
+    canDeleteEmployee,
+    
+    // Job History rights
+    canViewJobHistory,
+    canAddJobHistory,
+    canEditJobHistory,
+    canDeleteJobHistory,
     
     // Admin rights
-    canManageUsers: () => (isAdminOrSuperAdmin || hasRight('ADM_USER')) && (dbUserTypeValue === 'SUPERADMIN')
-  }), [hasRight, contextRights, userRights, isAdmin, isSuperAdmin, isAdminOrSuperAdmin, dbUserTypeValue]);
-
-  return returnValue;
+    canManageUsers,
+  };
 }

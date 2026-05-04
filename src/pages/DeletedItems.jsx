@@ -8,18 +8,26 @@ import { makeStamp } from '../utils/stamp';
 
 // ─── Tab config ────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'employees',   label: 'Employees' },
-  { id: 'jobhistory',  label: 'Job History' },
-  { id: 'jobs',        label: 'Jobs' },
+  { id: 'employees', label: 'Employees' },
+  { id: 'jobhistory', label: 'Job History' },
+  { id: 'jobs', label: 'Jobs' },
   { id: 'departments', label: 'Departments' },
 ];
 
-// ─── Th helper ────────────────────────────────────────────────────────────────
-function Th({ children }) {
+// ─── Table Helper Components ───────────────────────────────────────────────────
+function Th({ children, className = '' }) {
   return (
-    <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+    <th className={`px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap ${className}`}>
       {children}
     </th>
+  );
+}
+
+function Td({ children, className = '' }) {
+  return (
+    <td className={`px-3 py-3 ${className}`}>
+      {children}
+    </td>
   );
 }
 
@@ -94,22 +102,6 @@ function RecoverButton({ onClick, loading }) {
   );
 }
 
-function Th({ children, className = '' }) {
-  return (
-    <th className={`px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap ${className}`}>
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, className = '' }) {
-  return (
-    <td className={`px-3 py-3 ${className}`}>
-      {children}
-    </td>
-  );
-}
-
 // ─── Tab: Deleted Employees ────────────────────────────────────────────────────
 function DeletedEmployees({ userEmail }) {
   const [rows, setRows] = useState([]);
@@ -146,7 +138,7 @@ function DeletedEmployees({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} onRetry={load} />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!rows.length) return <EmptyState label="Employees" />;
 
   return (
@@ -203,7 +195,6 @@ function DeletedJobHistory({ userEmail }) {
         `)
         .eq('record_status', 'INACTIVE')
         .order('effdate', { ascending: false });
-
       if (dbErr) throw dbErr;
       setRows(data || []);
     } catch (err) {
@@ -239,7 +230,7 @@ function DeletedJobHistory({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} onRetry={load} />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!rows.length) return <EmptyState label="Job History" />;
 
   return (
@@ -315,7 +306,7 @@ function DeletedJobs({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} onRetry={load} />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!rows.length) return <EmptyState label="Jobs" />;
 
   return (
@@ -385,7 +376,7 @@ function DeletedDepartments({ userEmail }) {
   };
 
   if (loading) return <LoadingState />;
-  if (error)   return <ErrorState message={error} onRetry={load} />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
   if (!rows.length) return <EmptyState label="Departments" />;
 
   return (
@@ -467,7 +458,7 @@ export default function DeletedItems() {
         ))}
       </div>
 
-      {/* Tab panels — rendered once, shown/hidden via CSS to preserve state */}
+      {/* Tab panels */}
       <div className="bg-white rounded-b-xl rounded-tr-xl shadow-sm border border-t-0 border-slate-200 overflow-hidden">
         <div className={activeTab === 'employees' ? '' : 'hidden'}>
           <DeletedEmployees userEmail={userEmail} />

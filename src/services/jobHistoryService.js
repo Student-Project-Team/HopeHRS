@@ -18,8 +18,7 @@ export async function getJobHistoryByEmployee(empno, userType) {
         effdate,
         salary,
         record_status,
-        stamp
-        *,
+        stamp,
         job:jobcode (jobdesc),
         department:deptcode (deptname)
       `)
@@ -87,7 +86,6 @@ export async function createJobHistory(data, userId) {
         effdate: data.effDate || data.effdate,
         record_status: 'ACTIVE',
         salary: data.salary || null,
-        stamp: makeStamp('CREATED', userId),
         stamp: makeStamp('CREATED', userId)
       }])
       .select()
@@ -101,6 +99,15 @@ export async function createJobHistory(data, userId) {
   }
 }
 
+/**
+ * Update job history entry
+ * @param {string} empno - Employee number
+ * @param {string} jobcode - Job code
+ * @param {string} effdate - Effective date
+ * @param {Object} updates - { jobCode, deptCode, effDate, salary }
+ * @param {string} userId - User email for stamp
+ * @returns {Promise<Object>} - Updated record
+ */
 export async function updateJobHistory(empno, jobcode, effdate, updates, userId) {
   try {
     const stamp = makeStamp('UPDATED', userId);
@@ -114,21 +121,26 @@ export async function updateJobHistory(empno, jobcode, effdate, updates, userId)
         stamp,
       })
       .eq('empno', empno)
-      .eq('jobcode', oldJobCode)
-      .eq('effdate', oldEffDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
-      .select()
-      .single();
+      .select();
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   } catch (error) {
     console.error('updateJobHistory error:', error);
     throw error;
   }
 }
 
+/**
+ * Soft delete job history entry
+ * @param {string} empno - Employee number
+ * @param {string} jobcode - Job code
+ * @param {string} effdate - Effective date
+ * @param {string} userId - User email for stamp
+ * @returns {Promise<Object>} - Deleted record
+ */
 export async function softDeleteJobHistory(empno, jobcode, effdate, userId) {
   try {
     const stamp = makeStamp('DEACTIVATED', userId);
@@ -136,21 +148,26 @@ export async function softDeleteJobHistory(empno, jobcode, effdate, userId) {
       .from('jobhistory')
       .update({ record_status: 'INACTIVE', stamp })
       .eq('empno', empno)
-      .eq('jobcode', jobCode)
-      .eq('effdate', effDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
-      .select()
-      .single();
+      .select();
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   } catch (error) {
     console.error('softDeleteJobHistory error:', error);
     throw error;
   }
 }
 
+/**
+ * Recover soft deleted job history entry
+ * @param {string} empno - Employee number
+ * @param {string} jobcode - Job code
+ * @param {string} effdate - Effective date
+ * @param {string} userId - User email for stamp
+ * @returns {Promise<Object>} - Recovered record
+ */
 export async function recoverJobHistory(empno, jobcode, effdate, userId) {
   try {
     const stamp = makeStamp('RECOVERED', userId);
@@ -158,15 +175,12 @@ export async function recoverJobHistory(empno, jobcode, effdate, userId) {
       .from('jobhistory')
       .update({ record_status: 'ACTIVE', stamp })
       .eq('empno', empno)
-      .eq('jobcode', jobCode)
-      .eq('effdate', effDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
-      .select()
-      .single();
+      .select();
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   } catch (error) {
     console.error('recoverJobHistory error:', error);
     throw error;
