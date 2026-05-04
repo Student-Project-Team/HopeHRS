@@ -110,3 +110,33 @@ HopeHRS is a comprehensive web-based Human Resource Management System designed t
 - `favicon.svg`
 - `icons.svg`
 
+
+## Rights Matrix (17 Rights)
+
+| Module | Right | SUPERADMIN | ADMIN | USER |
+|--------|-------|------------|-------|------|
+| **Employee** | EMP_VIEW - View Employees | ✅ | ✅ | ✅ |
+| | EMP_ADD - Add Employee | ✅ | ✅ | ❌ |
+| | EMP_EDIT - Edit Employee | ✅ | ✅ | ❌ |
+| | EMP_DEL - Soft Delete Employee | ✅ | ❌ | ❌ |
+| **Job History** | JH_VIEW - View Job History | ✅ | ✅ | ✅ |
+| | JH_ADD - Add Job History | ✅ | ✅ | ❌ |
+| | JH_EDIT - Edit Job History | ✅ | ✅ | ❌ |
+| | JH_DEL - Soft Delete Job History | ✅ | ❌ | ❌ |
+| **Job** | JOB_VIEW - View Jobs | ✅ | ✅ | ✅ |
+| | JOB_ADD - Add Job | ✅ | ✅ | ❌ |
+| | JOB_EDIT - Edit Job | ✅ | ✅ | ❌ |
+| | JOB_DEL - Soft Delete Job | ✅ | ❌ | ❌ |
+| **Department** | DEPT_VIEW - View Departments | ✅ | ✅ | ✅ |
+| | DEPT_ADD - Add Department | ✅ | ✅ | ❌ |
+| | DEPT_EDIT - Edit Department | ✅ | ✅ | ❌ |
+| | DEPT_DEL - Soft Delete Department | ✅ | ❌ | ❌ |
+| **Admin** | ADM_USER - Activate/Manage Users | ✅ | ❌ | ❌ |
+
+
+
+
+
+
+
+
