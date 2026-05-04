@@ -22,6 +22,10 @@ export default function Layout() {
     if (pathname === '/departments') return 'Departments';
     if (pathname === '/admin') return 'Admin';
     if (pathname === '/deleted-items') return 'Deleted Items';
+    // NEW: Report routes
+    if (pathname === '/reports/headcount') return 'Headcount by Dept';
+    if (pathname === '/reports/salary') return 'Salary Summary';
+    if (pathname === '/reports/employee-history') return 'Employee History';
     return 'Employees';
   };
   
