@@ -1,3 +1,5 @@
+export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, employee, loading }) {
+  if (!isOpen || !employee) return null;
 export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, item, itemType, loading }) {
   if (!isOpen || !item) return null;
 
@@ -36,12 +38,17 @@ export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, it
           </div>
 
           <h3 className="text-center text-lg font-semibold text-slate-800 mb-1">
+            Deactivate Employee?
             Deactivate {getActionText()}?
           </h3>
           <p className="text-center text-sm text-slate-500 mb-1">
             You are about to deactivate:
           </p>
           <p className="text-center text-sm font-medium text-slate-700 mb-4">
+            {employee.firstname} {employee.lastname} ({employee.empno})
+          </p>
+          <p className="text-center text-xs text-slate-400 mb-6">
+            This sets the employee to INACTIVE. This action can be reversed by an ADMIN.
             {getItemLabel()}
           </p>
           <p className="text-center text-xs text-slate-400 mb-6">
@@ -75,4 +82,5 @@ export default function SoftDeleteConfirmDialog({ isOpen, onClose, onConfirm, it
       </div>
     </div>
   );
+}
 }

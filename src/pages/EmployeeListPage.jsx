@@ -26,7 +26,6 @@ export default function EmployeeListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEmployee, setEditEmployee] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -136,7 +135,6 @@ export default function EmployeeListPage() {
 
   return (
     <div className="p-4 md:p-6">
-
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
         <div>
@@ -195,7 +193,7 @@ export default function EmployeeListPage() {
                 <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Stamp</th>
               )}
               <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Actions</th>
-            </tr>
+             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {filteredEmployees.length === 0 ? (
@@ -306,8 +304,8 @@ export default function EmployeeListPage() {
                         </button>
                       )}
                     </div>
-                   </td>
-                 </tr>
+                  </td>
+                </tr>
               ))
             )}
           </tbody>

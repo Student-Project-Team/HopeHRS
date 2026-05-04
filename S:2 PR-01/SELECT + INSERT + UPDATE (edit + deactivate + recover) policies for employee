@@ -1,0 +1,81 @@
+-- ============================================
+-- PR-01: Complete employee RLS policies
+-- ============================================
+
+-- First, drop old policies on employee
+DROP POLICY IF EXISTS "Users see only ACTIVE records" ON employee;
+
+-- 1. SELECT policy
+CREATE POLICY "employee_select_policy" ON employee
+    FOR SELECT
+    USING (
+        record_status = 'ACTIVE' 
+        OR 
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    );
+
+-- 2. INSERT policy
+CREATE POLICY "employee_insert_policy" ON employee
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'EMP_ADD' 
+            AND right_value = 1
+        )
+    );
+
+-- 3. UPDATE-edit policy
+CREATE POLICY "employee_update_edit_policy" ON employee
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'EMP_EDIT' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'EMP_EDIT' 
+            AND right_value = 1
+        )
+    );
+
+-- 4. UPDATE-deactivate policy (CORRECTED - no OLD/NEW)
+CREATE POLICY "employee_update_deactivate_policy" ON employee
+    FOR UPDATE
+    USING (
+        -- User must have EMP_DEL right
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'EMP_DEL' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        -- Only allow setting record_status to 'INACTIVE'
+        record_status = 'INACTIVE'
+    );
+
+-- 5. UPDATE-recover policy (CORRECTED)
+CREATE POLICY "employee_update_recover_policy" ON employee
+    FOR UPDATE
+    USING (
+        -- Must be ADMIN or SUPERADMIN
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    )
+    WITH CHECK (
+        -- Only allow setting record_status to 'ACTIVE'
+        record_status = 'ACTIVE'
+    );
+
+
+
+
+

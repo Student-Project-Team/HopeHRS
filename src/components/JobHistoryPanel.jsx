@@ -9,12 +9,14 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
   const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 
+  // FILTER history based on user type
   const filteredHistory = useMemo(() => {
     if (!history) return [];
     if (!isAdminPlus) return history.filter(item => item.record_status === 'ACTIVE');
     return history;
   }, [history, isAdminPlus]);
 
+  // Whether the Actions column should render at all
   const showActions = canEditJobHistory() || canDeleteJobHistory();
 
   if (isLoading && filteredHistory.length === 0) {
@@ -50,15 +52,37 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
           <col style={{ width: '15%' }} />
           <col style={{ width: '13%' }} />
           <col style={{ width: '10%' }} />
-          {showActions && <col style={{ width: '20%' }} />}
+          {isAdminPlus && <col style={{ width: '12%' }} />}
+          {showActions && <col style={{ width: '8%' }} />}
         </colgroup>
         <thead>
           <tr className="border-b border-slate-100">
-            {['Job Title', 'Department', 'Effective Date', 'Salary', 'Status', ...(showActions ? ['Actions'] : [])].map((col) => (
-              <th key={col} className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                {col}
+            <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Job Title
+            </th>
+            <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Department
+            </th>
+            <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Effective Date
+            </th>
+            <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Salary
+            </th>
+            <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Status
+            </th>
+            {/* Stamp column - visible only for ADMIN/SUPERADMIN */}
+            {isAdminPlus && (
+              <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                Stamp
               </th>
-            ))}
+            )}
+            {showActions && (
+              <th className="px-3 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -94,9 +118,17 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
                 </span>
               </td>
 
+              {/* Stamp column - visible only for ADMIN/SUPERADMIN */}
+              {isAdminPlus && (
+                <td className="px-3 py-3 text-xs text-slate-500 max-w-[180px] truncate" title={item.stamp}>
+                  {item.stamp || '-'}
+                </td>
+              )}
+
               {showActions && (
                 <td className="px-3 py-3">
                   <div className="flex items-center gap-2">
+                    {/* Edit — JH_EDIT, only on ACTIVE records */}
                     {canEditJobHistory() && item.record_status === 'ACTIVE' && (
                       <button
                         onClick={() => onEdit?.(item)}
@@ -132,4 +164,5 @@ function JobHistoryPanel({ history, onRefresh, onEdit, onDelete, onRecover, isLo
   );
 }
 
+// Use memo to prevent unnecessary re-renders
 export default memo(JobHistoryPanel);

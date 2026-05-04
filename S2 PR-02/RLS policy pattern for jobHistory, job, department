@@ -1,0 +1,235 @@
+-- ============================================
+-- PR-02: RLS Policies for jobHistory, job, and department
+-- ============================================
+
+-- ============================================
+-- JOB HISTORY TABLE Policies
+-- ============================================
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "jobHistory_select_policy" ON jobHistory;
+DROP POLICY IF EXISTS "jobHistory_insert_policy" ON jobHistory;
+DROP POLICY IF EXISTS "jobHistory_update_edit_policy" ON jobHistory;
+DROP POLICY IF EXISTS "jobHistory_update_deactivate_policy" ON jobHistory;
+DROP POLICY IF EXISTS "jobHistory_update_recover_policy" ON jobHistory;
+
+-- 1. SELECT policy
+CREATE POLICY "jobHistory_select_policy" ON jobHistory
+    FOR SELECT
+    USING (
+        record_status = 'ACTIVE' 
+        OR 
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    );
+
+-- 2. INSERT policy (requires JH_ADD)
+CREATE POLICY "jobHistory_insert_policy" ON jobHistory
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JH_ADD' 
+            AND right_value = 1
+        )
+    );
+
+-- 3. UPDATE-edit policy (requires JH_EDIT)
+CREATE POLICY "jobHistory_update_edit_policy" ON jobHistory
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JH_EDIT' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JH_EDIT' 
+            AND right_value = 1
+        )
+    );
+
+-- 4. UPDATE-deactivate policy (requires JH_DEL)
+CREATE POLICY "jobHistory_update_deactivate_policy" ON jobHistory
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JH_DEL' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        record_status = 'INACTIVE'
+    );
+
+-- 5. UPDATE-recover policy (ADMIN/SUPERADMIN only)
+CREATE POLICY "jobHistory_update_recover_policy" ON jobHistory
+    FOR UPDATE
+    USING (
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    )
+    WITH CHECK (
+        record_status = 'ACTIVE'
+    );
+
+-- ============================================
+-- JOB TABLE Policies
+-- ============================================
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "job_select_policy" ON job;
+DROP POLICY IF EXISTS "job_insert_policy" ON job;
+DROP POLICY IF EXISTS "job_update_edit_policy" ON job;
+DROP POLICY IF EXISTS "job_update_deactivate_policy" ON job;
+DROP POLICY IF EXISTS "job_update_recover_policy" ON job;
+
+-- 1. SELECT policy
+CREATE POLICY "job_select_policy" ON job
+    FOR SELECT
+    USING (
+        record_status = 'ACTIVE' 
+        OR 
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    );
+
+-- 2. INSERT policy (requires JOB_ADD)
+CREATE POLICY "job_insert_policy" ON job
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JOB_ADD' 
+            AND right_value = 1
+        )
+    );
+
+-- 3. UPDATE-edit policy (requires JOB_EDIT)
+CREATE POLICY "job_update_edit_policy" ON job
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JOB_EDIT' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JOB_EDIT' 
+            AND right_value = 1
+        )
+    );
+
+-- 4. UPDATE-deactivate policy (requires JOB_DEL)
+CREATE POLICY "job_update_deactivate_policy" ON job
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'JOB_DEL' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        record_status = 'INACTIVE'
+    );
+
+-- 5. UPDATE-recover policy (ADMIN/SUPERADMIN only)
+CREATE POLICY "job_update_recover_policy" ON job
+    FOR UPDATE
+    USING (
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    )
+    WITH CHECK (
+        record_status = 'ACTIVE'
+    );
+
+-- ============================================
+-- DEPARTMENT TABLE Policies
+-- ============================================
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "department_select_policy" ON department;
+DROP POLICY IF EXISTS "department_insert_policy" ON department;
+DROP POLICY IF EXISTS "department_update_edit_policy" ON department;
+DROP POLICY IF EXISTS "department_update_deactivate_policy" ON department;
+DROP POLICY IF EXISTS "department_update_recover_policy" ON department;
+
+-- 1. SELECT policy
+CREATE POLICY "department_select_policy" ON department
+    FOR SELECT
+    USING (
+        record_status = 'ACTIVE' 
+        OR 
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    );
+
+-- 2. INSERT policy (requires DEPT_ADD)
+CREATE POLICY "department_insert_policy" ON department
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'DEPT_ADD' 
+            AND right_value = 1
+        )
+    );
+
+-- 3. UPDATE-edit policy (requires DEPT_EDIT)
+CREATE POLICY "department_update_edit_policy" ON department
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'DEPT_EDIT' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'DEPT_EDIT' 
+            AND right_value = 1
+        )
+    );
+
+-- 4. UPDATE-deactivate policy (requires DEPT_DEL)
+CREATE POLICY "department_update_deactivate_policy" ON department
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM UserModule_Rights
+            WHERE email = current_user 
+            AND right_code = 'DEPT_DEL' 
+            AND right_value = 1
+        )
+    )
+    WITH CHECK (
+        record_status = 'INACTIVE'
+    );
+
+-- 5. UPDATE-recover policy (ADMIN/SUPERADMIN only)
+CREATE POLICY "department_update_recover_policy" ON department
+    FOR UPDATE
+    USING (
+        get_current_user_type() IN ('ADMIN', 'SUPERADMIN')
+    )
+    WITH CHECK (
+        record_status = 'ACTIVE'
+    );
+

@@ -1,11 +1,24 @@
 import { supabase } from '../lib/supabase';
 import { makeStamp } from '../utils/stamp';
 
+/**
+ * Get job history by employee number
+ * @param {string} empno - Employee number
+ * @param {string} userType - USER, ADMIN, or SUPERADMIN
+ * @returns {Promise<Array>} - Array of job history records
+ */
 export async function getJobHistoryByEmployee(empno, userType) {
   try {
     let query = supabase
       .from('jobhistory')
       .select(`
+        empno,
+        jobcode,
+        deptcode,
+        effdate,
+        salary,
+        record_status,
+        stamp
         *,
         job:jobcode (jobdesc),
         department:deptcode (deptname)
@@ -34,6 +47,11 @@ export async function getJobHistoryByEmployee(empno, userType) {
   }
 }
 
+/**
+ * Get current (most recent ACTIVE) job for an employee
+ * @param {string} empno - Employee number
+ * @returns {Promise<Object|null>} - Current job or null
+ */
 export async function getCurrentJobForEmployee(empno) {
   try {
     const { data, error } = await supabase
@@ -52,6 +70,12 @@ export async function getCurrentJobForEmployee(empno) {
   }
 }
 
+/**
+ * Create a new job history entry
+ * @param {Object} data - { empNo, jobCode, deptCode, effDate, salary, endDate? }
+ * @param {string} userId - User email for stamp
+ * @returns {Promise<Object>} - Created record
+ */
 export async function createJobHistory(data, userId) {
   try {
     const { data: result, error } = await supabase
@@ -63,6 +87,7 @@ export async function createJobHistory(data, userId) {
         effdate: data.effDate || data.effdate,
         record_status: 'ACTIVE',
         salary: data.salary || null,
+        stamp: makeStamp('CREATED', userId),
         stamp: makeStamp('CREATED', userId)
       }])
       .select()
@@ -89,6 +114,8 @@ export async function updateJobHistory(empno, jobcode, effdate, updates, userId)
         stamp,
       })
       .eq('empno', empno)
+      .eq('jobcode', oldJobCode)
+      .eq('effdate', oldEffDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
       .select()
@@ -109,6 +136,8 @@ export async function softDeleteJobHistory(empno, jobcode, effdate, userId) {
       .from('jobhistory')
       .update({ record_status: 'INACTIVE', stamp })
       .eq('empno', empno)
+      .eq('jobcode', jobCode)
+      .eq('effdate', effDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
       .select()
@@ -129,6 +158,8 @@ export async function recoverJobHistory(empno, jobcode, effdate, userId) {
       .from('jobhistory')
       .update({ record_status: 'ACTIVE', stamp })
       .eq('empno', empno)
+      .eq('jobcode', jobCode)
+      .eq('effdate', effDate)
       .eq('jobcode', jobcode)
       .eq('effdate', effdate)
       .select()

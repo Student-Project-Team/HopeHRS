@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
-  { label: 'Employees', path: '/employees', icon: 'users' },
-  { label: 'Jobs', path: '/jobs', icon: 'briefcase' },
-  { label: 'Departments', path: '/departments', icon: 'building' },
+  { label: 'Employees', path: '/employees', icon: 'users', requiredType: ['ADMIN', 'SUPERADMIN'] },
+  { label: 'Jobs', path: '/jobs', icon: 'briefcase', requiredType: ['ADMIN', 'SUPERADMIN'] },
+  { label: 'Departments', path: '/departments', icon: 'building', requiredType: ['ADMIN', 'SUPERADMIN'] },
   { label: 'Admin', path: '/admin', icon: 'settings', requiredType: ['ADMIN', 'SUPERADMIN'] },
   { label: 'Deleted Items', path: '/deleted-items', icon: 'trash', requiredType: ['ADMIN', 'SUPERADMIN'] },
 ];
@@ -44,7 +44,7 @@ const Icon = ({ name, className }) => {
 export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const userType = user?.user_type || 'USER';
 
   // Filter nav items based on user permissions

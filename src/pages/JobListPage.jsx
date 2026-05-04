@@ -180,7 +180,7 @@ export default function JobListPage() {
                     {col}
                   </th>
                 ))}
-              </tr>
+               </>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredJobs.map((job) => (
@@ -196,7 +196,7 @@ export default function JobListPage() {
                     <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                       {job.jobCode}
                     </span>
-                  </td>
+                   </>
                   <td className="px-3 py-3 text-xs font-semibold text-slate-700 truncate">{job.jobDesc}</td>
                   <td className="px-3 py-3">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
@@ -209,11 +209,11 @@ export default function JobListPage() {
                       )}
                       {job.record_status}
                     </span>
-                  </td>
+                   </>
                   {isAdminPlus && (
                     <td className="px-3 py-3 text-[10px] text-slate-400 truncate" title={job.stamp}>
                       {job.stamp || '—'}
-                    </td>
+                     </>
                   )}
                   {isAdminPlus && (
                     <td className="px-3 py-3">
@@ -244,9 +244,9 @@ export default function JobListPage() {
                           </button>
                         )}
                       </div>
-                    </td>
+                     </>
                   )}
-                </tr>
+                 </>
               ))}
             </tbody>
           </table>
