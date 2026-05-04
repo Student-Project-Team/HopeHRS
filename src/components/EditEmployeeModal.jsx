@@ -10,6 +10,10 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
     sepdate: '',
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (isOpen && employee) {
@@ -21,16 +25,55 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
         hiredate: employee.hiredate || '',
         sepdate: employee.sepdate || '',
       });
+      setErrors({});
     }
   }, [isOpen, employee]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user makes changes
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateDates = () => {
+    const newErrors = {};
+    const { birthdate, hiredate, sepdate } = form;
+
+    // Birth date validation
+    if (birthdate && birthdate > today) {
+      newErrors.birthdate = 'Birth date cannot be in the future';
+    }
+
+    // Hire date validation
+    if (hiredate && hiredate > today) {
+      newErrors.hiredate = 'Hire date cannot be in the future';
+    }
+
+    // Separation date validation
+    if (sepdate) {
+      if (sepdate < hiredate) {
+        newErrors.sepdate = 'Separation date cannot be before hire date';
+      }
+      if (sepdate > today) {
+        newErrors.sepdate = 'Separation date cannot be in the future';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate dates before submitting
+    if (!validateDates()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -55,6 +98,8 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
   const inputClass =
     'w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition bg-white placeholder:text-slate-300';
 
+  const inputErrorClass = inputClass + ' border-red-400 focus:ring-red-400';
+  
   const labelClass = 'block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide';
 
   return (
@@ -150,8 +195,12 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
                 value={form.birthdate}
                 onChange={handleChange}
                 required
-                className={inputClass}
+                max={today}
+                className={errors.birthdate ? inputErrorClass : inputClass}
               />
+              {errors.birthdate && (
+                <p className="text-red-400 text-xs mt-1">{errors.birthdate}</p>
+              )}
             </div>
             <div>
               <label className={labelClass}>
@@ -163,8 +212,12 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
                 value={form.hiredate}
                 onChange={handleChange}
                 required
-                className={inputClass}
+                max={today}
+                className={errors.hiredate ? inputErrorClass : inputClass}
               />
+              {errors.hiredate && (
+                <p className="text-red-400 text-xs mt-1">{errors.hiredate}</p>
+              )}
             </div>
           </div>
 
@@ -179,8 +232,13 @@ export default function EditEmployeeModal({ isOpen, onClose, onSave, employee })
               name="sepdate"
               value={form.sepdate}
               onChange={handleChange}
-              className={inputClass}
+              min={form.hiredate || ''}
+              max={today}
+              className={errors.sepdate ? inputErrorClass : inputClass}
             />
+            {errors.sepdate && (
+              <p className="text-red-400 text-xs mt-1">{errors.sepdate}</p>
+            )}
           </div>
 
           {/* Footer */}

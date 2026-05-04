@@ -1,17 +1,19 @@
-import { useState } from 'react'; // ← ADD THIS IMPORT
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useRights } from '../hooks/useRights';
 
 const NAV_ITEMS = [
-  { label: 'Employees', path: '/employees', icon: 'users' },
-  { label: 'Jobs', path: '/jobs', icon: 'briefcase' },
-  { label: 'Departments', path: '/departments', icon: 'building' },
-  // NEW: Reports section with sub-items
+  { label: 'Employees', path: '/employees', icon: 'users', requiredType: ['USER', 'ADMIN', 'SUPERADMIN'] },
+  { label: 'Jobs', path: '/jobs', icon: 'briefcase', requiredType: ['USER', 'ADMIN', 'SUPERADMIN'] },
+  { label: 'Departments', path: '/departments', icon: 'building', requiredType: ['USER', 'ADMIN', 'SUPERADMIN'] },
+  // Reports section with sub-items (REQUIRED for M2 PR-02)
   { 
     label: 'Reports', 
     path: null, 
     icon: 'chart', 
     isSection: true,
+    requiredType: ['ADMIN', 'SUPERADMIN'],
     children: [
       { label: 'Headcount by Dept', path: '/reports/headcount', icon: 'chart-bar' },
       { label: 'Salary Summary', path: '/reports/salary', icon: 'currency-dollar' },
@@ -77,13 +79,13 @@ const Icon = ({ name, className }) => {
 export default function Sidebar({ isOpen, activeNav, onNavChange }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
-  const userType = user?.user_type || 'USER';
 
   // Filter nav items based on user permissions
   const visibleNavItems = NAV_ITEMS.filter(item => {
-    if (!item.requiredType) return true;
-    return item.requiredType.includes(userType);
+    if (item.requiredType) {
+      return item.requiredType.includes(user?.user_type || 'USER');
+    }
+    return true;
   });
 
   const handleNavigation = (label, path) => {
