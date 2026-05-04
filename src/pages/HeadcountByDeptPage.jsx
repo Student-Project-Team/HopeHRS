@@ -31,7 +31,7 @@ export default function HeadcountByDeptPage() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
           <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
         </div>
       </div>
@@ -68,13 +68,13 @@ export default function HeadcountByDeptPage() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto w-full">
-        <table className="w-full min-w-[600px]">
+        <table className="w-full min-w-[550px]">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Department Code</th>
-              <th className="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Department Name</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Employee Count</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">% of Total</th>
+              <th className="pl-6 pr-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Department Code</th>
+              <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Department Name</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Employee Count</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">% of Total</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -94,18 +94,18 @@ export default function HeadcountByDeptPage() {
             ) : (
               headcountData.map((dept, idx) => (
                 <tr key={dept.deptCode || idx} className="hover:bg-slate-50 transition-colors duration-100">
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="pl-6 pr-3 py-3 whitespace-nowrap">
                     <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                       {dept.deptCode}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs font-medium text-slate-700">
+                  <td className="px-3 py-3 text-xs font-medium text-slate-700">
                     {dept.deptName}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center font-semibold text-slate-800 whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center font-semibold text-slate-800 whitespace-nowrap">
                     {dept.headcount || 0}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center text-slate-500 whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center text-slate-500 whitespace-nowrap pr-8">
                     {totalEmployees > 0 
                       ? `${((dept.headcount || 0) / totalEmployees * 100).toFixed(1)}%`
                       : '0%'

@@ -153,7 +153,7 @@ export default function DeptListPage() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden w-full">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto w-full">
         {filteredDepartments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
@@ -168,18 +168,18 @@ export default function DeptListPage() {
             )}
           </div>
         ) : (
-          <table className="w-full table-fixed">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                {[
-                  'Dept Code', 'Department Name', 'Status',
-                  ...(isAdminPlus ? ['Stamp'] : []),
-                  ...(isAdminPlus ? ['Actions'] : []),
-                ].map((col) => (
-                  <th key={col} className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {col}
-                  </th>
-                ))}
+                <th className="pl-6 pr-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Dept Code</th>
+                <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Department Name</th>
+                <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Status</th>
+                {isAdminPlus && (
+                  <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Stamp</th>
+                )}
+                {isAdminPlus && (
+                  <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -192,13 +192,15 @@ export default function DeptListPage() {
                       : 'hover:bg-slate-50'
                   }`}
                 >
-                  <td className="px-3 py-3">
+                  <td className="pl-6 pr-3 py-3 whitespace-nowrap">
                     <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                       {dept.deptCode}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-xs font-semibold text-slate-700 truncate">{dept.deptName}</td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3 text-xs font-semibold text-slate-700 break-words max-w-[300px]">
+                    {dept.deptName}
+                  </td>
+                  <td className="px-3 py-3 whitespace-nowrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
                       dept.record_status === 'ACTIVE'
                         ? 'bg-green-100 text-green-700 border-green-200'
@@ -211,12 +213,17 @@ export default function DeptListPage() {
                     </span>
                   </td>
                   {isAdminPlus && (
-                    <td className="px-3 py-3 text-[10px] text-slate-400 truncate" title={dept.stamp}>
-                      {dept.stamp || '—'}
+                    <td className="px-3 py-3">
+                      <span 
+                        className="text-[10px] text-slate-400 block max-w-[200px] truncate" 
+                        title={dept.stamp}
+                      >
+                        {dept.stamp || '—'}
+                      </span>
                     </td>
                   )}
                   {isAdminPlus && (
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3 whitespace-nowrap pr-8">
                       <div className="flex items-center gap-2">
                         {canEditDepartment() && dept.record_status === 'ACTIVE' && (
                           <button

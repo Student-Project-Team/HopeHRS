@@ -37,9 +37,13 @@ export default function EmployeeDetailPage() {
       if (!empno) return;
       try {
         setLoading(true);
-        const data = await getEmployeeById(empno);
-        setEmployee(data);
         setError(null);
+        const data = await getEmployeeById(empno);
+        if (!data) {
+          setError('Employee not found');
+        } else {
+          setEmployee(data);
+        }
       } catch (err) {
         console.error('Fetch error:', err);
         setError(err.message || 'Failed to load employee data');
@@ -88,22 +92,46 @@ export default function EmployeeDetailPage() {
     }
   };
 
-  if (loading) return (
-    <div className="p-4 md:p-6 flex items-center justify-center gap-2 text-slate-500">
-      <div className="w-4 h-4 border-2 border-slate-200 border-t-blue-900 rounded-full animate-spin" />
-      <span className="text-sm">Loading employee details...</span>
-    </div>
-  );
+  // Consistent loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+          <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (error || !employee) return (
-    <div className="p-4 md:p-6 text-red-600 bg-red-50 rounded-xl border border-red-200 text-sm">
-      Error: {error || 'Employee not found'}
-    </div>
-  );
+  // Consistent error state
+  if (error || !employee) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-red-600 mb-2">Error loading employee</p>
+          <p className="text-xs text-red-500 mb-4">{error || 'Employee not found'}</p>
+          <button
+            onClick={() => navigate('/employees')}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-blue-900 hover:text-blue-950 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Employees
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6">
-
       {/* Back Button */}
       <button
         onClick={() => navigate('/employees')}
@@ -117,7 +145,6 @@ export default function EmployeeDetailPage() {
 
       {/* Employee Profile Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
-
         {/* Card Header */}
         <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100">
           <div className="w-9 h-9 rounded-xl bg-blue-900 flex items-center justify-center shrink-0">
@@ -202,9 +229,11 @@ export default function EmployeeDetailPage() {
           </div>
 
           {jobHistoryLoading ? (
-            <div className="bg-white rounded-2xl border border-slate-100 px-6 py-10 flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-slate-200 border-t-blue-900 rounded-full animate-spin" />
-              <span className="text-xs text-slate-400">Loading job history...</span>
+            <div className="bg-white rounded-2xl border border-slate-100 px-6 py-10 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-6 h-6 border-2 border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+                <span className="text-xs text-slate-400">Loading job history...</span>
+              </div>
             </div>
           ) : jobHistory.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-100 px-6 py-12 text-center">
@@ -213,7 +242,8 @@ export default function EmployeeDetailPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">No job history found</p>
+              <p className="text-sm font-medium text-slate-500">No job history found</p>
+              <p className="text-xs text-slate-400 mt-1">This employee has no job history records</p>
             </div>
           ) : (
             <JobHistoryPanel
