@@ -21,11 +21,16 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
       if (signInError) throw signInError;
 
       console.log('Signed in user:', data.user.email);
 
+      // Check if user exists in users table
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('record_status, user_type')
@@ -37,6 +42,7 @@ export default function Login() {
       if (userError) {
         console.error('User fetch error:', userError);
         setError('Database error. Please contact administrator.');
+        await supabase.auth.signOut();
         setLoading(false);
         return;
       }
@@ -57,11 +63,15 @@ export default function Login() {
         return;
       }
 
+      // Store user info in session storage for quick access
+      sessionStorage.setItem('user_type', userData.user_type);
+      sessionStorage.setItem('user_email', data.user.email);
+
       console.log('Login successful! Redirecting to /employees...');
       navigate('/employees');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -71,7 +81,9 @@ export default function Login() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/callback` }
+        options: { 
+          redirectTo: `${window.location.origin}/callback`
+        }
       });
       if (error) throw error;
     } catch (err) {
@@ -92,6 +104,7 @@ export default function Login() {
           <p className="mt-0.5 text-xs text-slate-400">Access your HR dashboard</p>
         </div>
 
+        {/* Email/Password Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Email address</p>
@@ -102,6 +115,7 @@ export default function Login() {
               placeholder="you@company.com"
               className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
+              autoComplete="email"
             />
           </div>
 
@@ -114,9 +128,11 @@ export default function Login() {
               placeholder="••••••"
               className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
+              autoComplete="current-password"
             />
           </div>
 
+          {/* Error Message */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2">
               <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,6 +142,7 @@ export default function Login() {
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -142,12 +159,14 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="flex items-center gap-3 my-5">
           <hr className="flex-1 border-slate-100" />
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">or</span>
           <hr className="flex-1 border-slate-100" />
         </div>
 
+        {/* Google Login Button */}
         <button
           onClick={handleGoogleLogin}
           className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs tracking-wide py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -161,6 +180,7 @@ export default function Login() {
           Sign in with Google
         </button>
 
+        {/* Register Link */}
         <p className="text-center text-xs text-slate-400 mt-6">
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-900 hover:underline font-semibold">

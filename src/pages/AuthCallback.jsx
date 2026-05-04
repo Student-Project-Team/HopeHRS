@@ -1,69 +1,121 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   useEffect(() => {
     const handleCallback = async () => {
+      console.log('--- AuthCallback Debug ---');
+      console.log('Current URL:', window.location.href);
+      console.log('Hash:', window.location.hash);
+      console.log('Search params:', window.location.search);
+      
       try {
+        // Check if there's an error in the URL
+        const params = new URLSearchParams(window.location.search);
+        const urlError = params.get('error');
+        const errorDescription = params.get('error_description');
+        
+        if (urlError) {
+          console.error('URL Error:', urlError, errorDescription);
+          setError(`Authentication error: ${errorDescription || urlError}`);
+          setTimeout(() => navigate('/login'), 4000);
+          return;
+        }
+
+        // First, try to get the session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        console.log('Session result:', session ? 'Session found' : 'No session');
+        console.log('Session error:', sessionError);
 
         if (sessionError) {
           console.error('Session error:', sessionError);
-          setError('Failed to get session');
-          setTimeout(() => navigate('/login'), 3000);
+          setError('Failed to get session. Please try again.');
+          setTimeout(() => navigate('/login'), 4000);
           return;
         }
 
         if (!session) {
-          console.error('No session found');
-          setError('No session found');
-          setTimeout(() => navigate('/login'), 3000);
+          // Try to exchange code for session
+          const code = params.get('code');
+          console.log('Authorization code present:', !!code);
+          
+          if (code) {
+            console.log('Exchanging code for session...');
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (exchangeError) {
+              console.error('Code exchange error:', exchangeError);
+              setError('Failed to exchange code for session. Please try again.');
+              setTimeout(() => navigate('/login'), 4000);
+              return;
+            }
+            
+            console.log('Code exchange successful:', data?.session?.user?.email);
+          } else {
+            console.error('No session and no code found');
+            setError('No session found. Please try logging in again.');
+            setTimeout(() => navigate('/login'), 4000);
+            return;
+          }
+        }
+
+        // Get session again after exchange
+        const { data: { session: finalSession }, error: finalError } = await supabase.auth.getSession();
+        
+        if (finalError || !finalSession) {
+          console.error('Final session error:', finalError);
+          setError('Failed to establish session. Please try again.');
+          setTimeout(() => navigate('/login'), 4000);
           return;
         }
 
-        console.log('Google login successful! Email:', session.user.email);
+        console.log('Login successful! Email:', finalSession.user.email);
 
+        // Check user record
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('user_type, record_status')
-          .eq('email', session.user.email)
+          .eq('email', finalSession.user.email)
           .maybeSingle();
 
         console.log('User data from DB:', userData);
 
         if (userError) {
           console.error('Database error:', userError);
-          setError('Database error');
-          setTimeout(() => navigate('/login'), 3000);
+          setError('Database error occurred.');
+          setTimeout(() => navigate('/login'), 4000);
           return;
         }
 
         if (!userData) {
-          console.error('User not found in user table for email:', session.user.email);
+          console.error('User not found in user table');
           setError('User not authorized. Please contact administrator.');
           await supabase.auth.signOut();
-          setTimeout(() => navigate('/login'), 3000);
+          setTimeout(() => navigate('/login'), 4000);
           return;
         }
 
         if (userData.record_status !== 'ACTIVE') {
           console.error('User account is inactive');
-          setError('Your account is pending activation.');
+          setError('Your account is pending activation by an HR administrator.');
           await supabase.auth.signOut();
-          setTimeout(() => navigate('/login'), 3000);
+          setTimeout(() => navigate('/login'), 4000);
           return;
         }
 
-        console.log('SUPERADMIN login successful! Redirecting...');
+        console.log('Redirecting to employees page...');
         navigate('/employees');
       } catch (err) {
         console.error('Unexpected error:', err);
-        setError('Authentication failed');
-        setTimeout(() => navigate('/login'), 3000);
+        setError(err.message || 'Authentication failed');
+        setTimeout(() => navigate('/login'), 4000);
       }
     };
 

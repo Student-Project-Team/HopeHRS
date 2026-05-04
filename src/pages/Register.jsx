@@ -25,34 +25,82 @@ export default function Register() {
 
     const { firstName, lastName, username, email, password, confirmPassword } = form;
 
+    // Validation
     if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
       setError('All fields required.');
       return;
     }
-    if (firstName.length < 2) { setError('First name must be at least 2 characters.'); return; }
-    if (lastName.length < 2)  { setError('Last name must be at least 2 characters.'); return; }
-    if (username.length < 3)  { setError('Username must be at least 3 characters.'); return; }
-    if (!email.includes('@') || !email.includes('.')) { setError('Please enter a valid email address.'); return; }
-    if (password.length < 6)  { setError('Password must be at least 6 characters.'); return; }
-    if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
+    if (firstName.length < 2) {
+      setError('First name must be at least 2 characters.');
+      return;
+    }
+    if (lastName.length < 2) {
+      setError('Last name must be at least 2 characters.');
+      return;
+    }
+    if (username.length < 3) {
+      setError('Username must be at least 3 characters.');
+      return;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      // Create user in Supabase Auth
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { first_name: firstName, last_name: lastName, username }
+          data: { 
+            first_name: firstName, 
+            last_name: lastName, 
+            username: username 
+          }
         }
       });
 
       if (signUpError) throw signUpError;
 
-      alert('Registration successful! Please check your email to confirm your account.');
+      if (data?.user) {
+        // Wait a moment for the trigger to create the users table record
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Verify the user record was created
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('record_status')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (userError || !userData) {
+          console.warn('User record may need manual activation');
+        }
+      }
+
+      // Show success message with activation instructions
+      alert('Registration successful! Please check your email to confirm your account.\n\nAn administrator must activate your account before you can log in.');
       navigate('/login');
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      console.error('Registration error:', err);
+      
+      // Handle specific error messages
+      if (err.message.includes('already registered')) {
+        setError('This email is already registered. Please log in or use a different email.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,7 +110,9 @@ export default function Register() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/callback` }
+        options: { 
+          redirectTo: `${window.location.origin}/callback`
+        }
       });
       if (error) throw error;
     } catch (err) {
