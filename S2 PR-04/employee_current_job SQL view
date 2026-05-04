@@ -1,0 +1,26 @@
+-- ============================================
+-- PR-04: employee_current_job View
+-- ============================================
+
+CREATE OR REPLACE VIEW employee_current_job AS
+SELECT 
+    e.empno,
+    e.lastname,
+    e.firstname,
+    jh.salary,
+    jh.effDate AS current_job_start_date,
+    j.jobDesc,
+    d.deptName,
+    jh.record_status
+FROM employee e
+JOIN jobHistory jh ON e.empno = jh.empNo
+JOIN job j ON jh.jobCode = j.jobCode
+JOIN department d ON jh.deptCode = d.deptCode
+WHERE jh.effDate = (
+    SELECT MAX(effDate) 
+    FROM jobHistory jh2 
+    WHERE jh2.empNo = e.empno
+    AND jh2.record_status = 'ACTIVE'
+)
+AND jh.record_status = 'ACTIVE';
+
