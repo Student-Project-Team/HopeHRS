@@ -114,31 +114,6 @@ export default function JobListPage() {
       Error: {error}
     </div>
   );
-import { getAllJobs } from '../services/jobService';
-
-export default function JobListPage() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllJobs();
-        setJobs(data || []);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobs();
-  }, []);
-
-  if (loading) return <div className="p-6 text-center">Loading jobs...</div>;
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (
     <div>
@@ -147,7 +122,6 @@ export default function JobListPage() {
           <h1 className="text-2xl font-semibold text-slate-800">Jobs</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage job positions and descriptions</p>
         </div>
-        {/* Add Job button - JOB_ADD (ADMIN, SUPERADMIN) */}
         {canAddJob() && (
           <button
             onClick={() => setShowAddModal(true)}
@@ -158,7 +132,6 @@ export default function JobListPage() {
         )}
       </div>
 
-      {/* Status Filter - ADMIN+ only */}
       {isAdminPlus && (
         <div className="flex flex-wrap gap-2 mb-4">
           {['ACTIVE', 'INACTIVE', 'ALL'].map((f) => (
@@ -236,7 +209,6 @@ export default function JobListPage() {
                     )}
                     {isAdminPlus && (
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {/* Edit Job button - JOB_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
                         {canEditJob() && job.record_status === 'ACTIVE' && (
                           <button
                             onClick={() => { setEditingJob(job); setShowEditModal(true); }}
@@ -245,8 +217,6 @@ export default function JobListPage() {
                             Edit
                           </button>
                         )}
-
-                        {/* Delete Job button - JOB_DEL (SUPERADMIN only) - only on ACTIVE records */}
                         {canDeleteJob() && isSuperAdmin && job.record_status === 'ACTIVE' && (
                           <button
                             onClick={() => setDeleteTarget(job)}
@@ -255,9 +225,8 @@ export default function JobListPage() {
                             Delete
                           </button>
                         )}
-
-                        {/* Recover Job button - ADMIN+ - only on INACTIVE records */}
-                        {isAdminPlus && job.record_status === 'INACTIVE' && (
+                        {/* RECOVER - ADMIN only (USER cannot see INACTIVE records at all) */}
+                        {userType === 'ADMIN' && job.record_status === 'INACTIVE' && (
                           <button
                             onClick={() => handleRecover(job.jobCode)}
                             disabled={actionLoading === job.jobCode}
@@ -298,33 +267,6 @@ export default function JobListPage() {
         itemType="job"
         loading={deleteLoading}
       />
-        <h1 className="text-2xl font-bold">Jobs</h1>
-      </div>
-
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left">Job Code</th>
-              <th className="px-6 py-3 text-left">Job Description</th>
-              <th className="px-6 py-3 text-left">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((job) => (
-              <tr key={job.jobCode} className="border-t">
-                <td className="px-6 py-4">{job.jobCode}</td>
-                <td className="px-6 py-4">{job.jobDesc}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 text-xs rounded-full ${job.record_status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {job.record_status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

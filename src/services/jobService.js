@@ -119,5 +119,3 @@ export async function recoverJob(jobCode, userId) {
     throw error;
   }
 }
-}
-}

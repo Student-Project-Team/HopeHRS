@@ -57,19 +57,12 @@ export default function AddJobModal({ isOpen, onClose, onSave, editingJob }) {
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Job Code <span className="text-red-500">*</span>
             </label>
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-bold mb-4">{editingJob ? 'Edit Job' : 'Add Job'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Job Code</label>
             <input
               type="text"
               value={jobCode}
               onChange={(e) => setJobCode(e.target.value.toUpperCase())}
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"
               placeholder="e.g. MGR"
-              className="w-full border rounded-lg px-3 py-2"
               required
               disabled={!!editingJob}
               maxLength={4}
@@ -83,9 +76,6 @@ export default function AddJobModal({ isOpen, onClose, onSave, editingJob }) {
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Job Description <span className="text-red-500">*</span>
             </label>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Job Description</label>
             <input
               type="text"
               value={jobDesc}
@@ -118,20 +108,10 @@ export default function AddJobModal({ isOpen, onClose, onSave, editingJob }) {
               ) : (
                 'Save'
               )}
-              className="w-full border rounded-lg px-3 py-2"
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
-}
 }

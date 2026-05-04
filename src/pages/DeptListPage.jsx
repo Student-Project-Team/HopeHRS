@@ -114,31 +114,6 @@ export default function DeptListPage() {
       Error: {error}
     </div>
   );
-import { getAllDepartments } from '../services/departmentService';
-
-export default function DeptListPage() {
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllDepartments();
-        setDepartments(data || []);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDepartments();
-  }, []);
-
-  if (loading) return <div className="p-6 text-center">Loading departments...</div>;
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (
     <div>
@@ -147,7 +122,6 @@ export default function DeptListPage() {
           <h1 className="text-2xl font-semibold text-slate-800">Departments</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage organizational departments</p>
         </div>
-        {/* Add Department button - DEPT_ADD (ADMIN, SUPERADMIN) */}
         {canAddDepartment() && (
           <button
             onClick={() => setShowAddModal(true)}
@@ -158,7 +132,6 @@ export default function DeptListPage() {
         )}
       </div>
 
-      {/* Status Filter - ADMIN+ only */}
       {isAdminPlus && (
         <div className="flex flex-wrap gap-2 mb-4">
           {['ACTIVE', 'INACTIVE', 'ALL'].map((f) => (
@@ -241,10 +214,8 @@ export default function DeptListPage() {
                         {dept.stamp || '-'}
                       </td>
                     )}
-                    {/* Actions column - ADMIN+ only */}
                     {isAdminPlus && (
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {/* Edit Department button - DEPT_EDIT (ADMIN, SUPERADMIN) - only on ACTIVE records */}
                         {canEditDepartment() && dept.record_status === 'ACTIVE' && (
                           <button
                             onClick={() => { setEditingDept(dept); setShowEditModal(true); }}
@@ -253,8 +224,6 @@ export default function DeptListPage() {
                             Edit
                           </button>
                         )}
-
-                        {/* Delete Department button - DEPT_DEL (SUPERADMIN only) - only on ACTIVE records */}
                         {canDeleteDepartment() && isSuperAdmin && dept.record_status === 'ACTIVE' && (
                           <button
                             onClick={() => setDeleteTarget(dept)}
@@ -263,9 +232,8 @@ export default function DeptListPage() {
                             Delete
                           </button>
                         )}
-
-                        {/* Recover Department button - ADMIN+ - only on INACTIVE records */}
-                        {dept.record_status === 'INACTIVE' && (
+                        {/* RECOVER - ADMIN only (USER cannot see INACTIVE records at all) */}
+                        {userType === 'ADMIN' && dept.record_status === 'INACTIVE' && (
                           <button
                             onClick={() => handleRecover(dept.deptCode)}
                             disabled={actionLoading === dept.deptCode}
@@ -306,33 +274,6 @@ export default function DeptListPage() {
         itemType="department"
         loading={deleteLoading}
       />
-        <h1 className="text-2xl font-bold">Departments</h1>
-      </div>
-
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left">Dept Code</th>
-              <th className="px-6 py-3 text-left">Department Name</th>
-              <th className="px-6 py-3 text-left">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {departments.map((dept) => (
-              <tr key={dept.deptCode} className="border-t">
-                <td className="px-6 py-4">{dept.deptCode}</td>
-                <td className="px-6 py-4">{dept.deptName}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 text-xs rounded-full ${dept.record_status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {dept.record_status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
