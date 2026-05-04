@@ -1,0 +1,34 @@
+-- ============================================
+-- PR-02: Admin RLS on User Table + UserModule_Rights
+-- ============================================
+
+-- POLICY 1: ADMIN can only see non-SUPERADMIN users (can't modify them at all)
+DROP POLICY IF EXISTS "admin_only_see_non_superadmin" ON "user";
+CREATE POLICY "admin_only_see_non_superadmin" ON "user"
+    FOR ALL
+    USING (
+        CASE 
+            WHEN get_current_user_type() = 'ADMIN' THEN
+                user_type != 'SUPERADMIN'  -- ADMIN cannot see SUPERADMIN users
+            ELSE
+                TRUE  -- SUPERADMIN sees everything
+        END
+    );
+
+
+-- POLICY 2: ADMIN cannot modify SUPERADMIN rights in UserModule_Rights
+DROP POLICY IF EXISTS "admin_no_superadmin_rights" ON "UserModule_Rights";
+CREATE POLICY "admin_no_superadmin_rights" ON "UserModule_Rights"
+    FOR ALL
+    USING (
+        CASE 
+            WHEN get_current_user_type() = 'ADMIN' THEN
+                NOT EXISTS (
+                    SELECT 1 FROM "user"
+                    WHERE "user" = "UserModule_Rights"
+                    AND "user".user_type = 'SUPERADMIN'
+                )
+            ELSE
+                TRUE
+        END
+    );
