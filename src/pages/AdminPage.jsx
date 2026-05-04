@@ -16,17 +16,18 @@ export default function Admin() {
     fetchUsers();
   }, []);
 
-  // Check if current user has admin rights
   if (!canManageUsers()) {
     return (
-      <div className="p-6">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
-          <svg className="w-8 h-8 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          </svg>
-          <p className="text-sm font-medium text-amber-700">Access Restricted</p>
-          <p className="text-xs text-amber-600 mt-1">You don't have permission to manage users.</p>
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-8 w-full max-w-sm text-center shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Access Restricted</p>
+          <p className="text-sm font-medium text-slate-700">You don't have permission to manage users.</p>
         </div>
       </div>
     );
@@ -85,189 +86,173 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 p-8">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-600" />
-        Loading users...
+      <div className="flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+          <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="p-4 md:p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-800">User Management</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          Manage user accounts and permissions
-        </p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">User Management</h1>
+          <p className="mt-0.5 text-xs text-slate-400">Manage user accounts and permissions</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Email
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden w-full">
+        <table className="w-full table-fixed">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50">
+              {['Email', 'User Type', 'Status', 'Stamp', 'Actions'].map((col) => (
+                <th
+                  key={col}
+                  className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider"
+                >
+                  {col}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  User Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Stamp
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {users.map((user) => {
-                const isSuperAdminRow = isSuperAdmin(user.user_type);
-                const isProtected = isSuperAdminRow;
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {users.map((user) => {
+              const isSuperAdminRow = isSuperAdmin(user.user_type);
+              const isProtected = isSuperAdminRow;
 
-                return (
-                  <tr 
-                    key={user.email} 
-                    className={`hover:bg-slate-50 transition ${
-                      isProtected ? 'bg-slate-50 opacity-75' : ''
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-slate-700">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-md ${
-                        user.user_type === 'SUPERADMIN' 
-                          ? 'bg-purple-100 text-purple-700'
-                          : user.user_type === 'ADMIN'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {user.user_type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-md ${
-                        user.record_status === 'ACTIVE'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {user.record_status || 'ACTIVE'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-slate-400 max-w-[200px] truncate" title={user.stamp}>
-                      {user.stamp || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {isProtected ? (
-                        <span 
-                          className="text-slate-400 text-sm font-medium cursor-not-allowed"
-                          title="SUPERADMIN accounts cannot be modified"
-                        >
-                          Protected
-                        </span>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {user.record_status === 'INACTIVE' ? (
-                            <button
-                              onClick={() => handleActivate(user.email)}
-                              disabled={actionLoading === user.email}
-                              className="text-emerald-600 hover:text-emerald-700 text-sm font-medium transition disabled:opacity-50"
-                            >
-                              {actionLoading === user.email ? '...' : 'Activate'}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleDeactivate(user.email)}
-                              disabled={actionLoading === user.email}
-                              className="text-red-600 hover:text-red-700 text-sm font-medium transition disabled:opacity-50"
-                            >
-                              {actionLoading === user.email ? '...' : 'Deactivate'}
-                            </button>
-                          )}
-                          
-                          {isCurrentUserSuperAdmin && (
-                            <button
-                              onClick={() => openTypeModal(user)}
-                              disabled={actionLoading === user.email}
-                              className="text-slate-600 hover:text-slate-700 text-sm font-medium transition disabled:opacity-50"
-                              title="Change user type (ADMIN/USER)"
-                            >
-                              Change Type
-                            </button>
-                          )}
-                        </div>
+              return (
+                <tr
+                  key={user.email}
+                  className={`transition-colors duration-100 ${
+                    isProtected ? 'bg-slate-50/70 opacity-60' : 'hover:bg-slate-50'
+                  }`}
+                >
+                  <td className="px-3 py-3 text-xs font-semibold text-slate-700 truncate">{user.email}</td>
+                  <td className="px-3 py-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      user.user_type === 'SUPERADMIN'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                        : user.user_type === 'ADMIN'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                    }`}>
+                      {user.user_type}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      user.record_status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-700 border-green-200'
+                        : 'bg-white text-slate-400 border-slate-200'
+                    }`}>
+                      {user.record_status === 'ACTIVE' && (
+                        <span className="w-1 h-1 rounded-full bg-green-500 shrink-0" />
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {user.record_status || 'ACTIVE'}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 text-[10px] text-slate-400 truncate" title={user.stamp}>
+                    {user.stamp || '—'}
+                  </td>
+                  <td className="px-3 py-3">
+                    {isProtected ? (
+                      <span className="text-[11px] font-semibold text-slate-400 cursor-not-allowed" title="SUPERADMIN accounts cannot be modified">
+                        Protected
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {user.record_status === 'INACTIVE' ? (
+                          <button
+                            onClick={() => handleActivate(user.email)}
+                            disabled={actionLoading === user.email}
+                            className="text-[11px] font-semibold text-green-600 hover:text-green-700 transition-colors disabled:opacity-40"
+                          >
+                            {actionLoading === user.email ? '...' : 'Activate'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleDeactivate(user.email)}
+                            disabled={actionLoading === user.email}
+                            className="text-[11px] font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                          >
+                            {actionLoading === user.email ? '...' : 'Deactivate'}
+                          </button>
+                        )}
+                        {isCurrentUserSuperAdmin && (
+                          <button
+                            onClick={() => openTypeModal(user)}
+                            disabled={actionLoading === user.email}
+                            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-40"
+                          >
+                            Change Type
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Change User Type Modal */}
       {showTypeModal && selectedUser && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
           onClick={(e) => e.target === e.currentTarget && setShowTypeModal(false)}
         >
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-800">
-                Change User Type
-              </h2>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">User Management</p>
+                <h2 className="text-base font-bold text-slate-800 tracking-tight">Change User Type</h2>
+              </div>
               <button
                 onClick={() => setShowTypeModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            <div className="px-5 py-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  User
-                </label>
-                <p className="text-sm text-slate-800">{selectedUser.email}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">User</p>
+                <p className="text-sm font-semibold text-slate-700">{selectedUser.email}</p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Current User Type
-                </label>
-                <p className="text-sm text-slate-800">{selectedUser.user_type}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Type</p>
+                <p className="text-sm font-semibold text-slate-700">{selectedUser.user_type}</p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  New User Type
-                </label>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">New Type</p>
                 <select
                   value={newUserType}
                   onChange={(e) => setNewUserType(e.target.value)}
-                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-900 transition"
                 >
                   <option value="ADMIN">ADMIN</option>
                   <option value="USER">USER</option>
                 </select>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-[10px] text-slate-400 mt-1.5">
                   Cannot change to SUPERADMIN. Only SUPERADMIN can change user types.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowTypeModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
@@ -275,7 +260,7 @@ export default function Admin() {
                   type="button"
                   onClick={handleChangeUserType}
                   disabled={actionLoading === selectedUser.email}
-                  className="px-4 py-2 text-sm font-medium text-white bg-slate-700 hover:bg-slate-800 rounded-lg disabled:opacity-60 flex items-center gap-2 transition"
+                  className="px-4 py-2 text-xs font-semibold text-white bg-blue-900 hover:bg-blue-950 rounded-lg disabled:opacity-60 flex items-center gap-2 transition"
                 >
                   {actionLoading === selectedUser.email ? (
                     <>

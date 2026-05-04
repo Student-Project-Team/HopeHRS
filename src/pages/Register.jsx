@@ -25,35 +25,16 @@ export default function Register() {
 
     const { firstName, lastName, username, email, password, confirmPassword } = form;
 
-    // Validation
     if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
       setError('All fields required.');
       return;
     }
-    if (firstName.length < 2) {
-      setError('First name must be at least 2 characters.');
-      return;
-    }
-    if (lastName.length < 2) {
-      setError('Last name must be at least 2 characters.');
-      return;
-    }
-    if (username.length < 3) {
-      setError('Username must be at least 3 characters.');
-      return;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
+    if (firstName.length < 2) { setError('First name must be at least 2 characters.'); return; }
+    if (lastName.length < 2)  { setError('Last name must be at least 2 characters.'); return; }
+    if (username.length < 3)  { setError('Username must be at least 3 characters.'); return; }
+    if (!email.includes('@') || !email.includes('.')) { setError('Please enter a valid email address.'); return; }
+    if (password.length < 6)  { setError('Password must be at least 6 characters.'); return; }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
 
     setLoading(true);
 
@@ -62,11 +43,7 @@ export default function Register() {
         email,
         password,
         options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            username: username
-          }
+          data: { first_name: firstName, last_name: lastName, username }
         }
       });
 
@@ -85,9 +62,7 @@ export default function Register() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/callback`
-        }
+        options: { redirectTo: `${window.location.origin}/callback` }
       });
       if (error) throw error;
     } catch (err) {
@@ -97,115 +72,110 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-md p-8">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm w-full max-w-md p-8">
+
+        {/* Logo / Brand */}
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-white text-lg font-bold mx-auto mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-900 rounded-lg text-white text-sm font-bold tracking-widest mb-4">
             HR
           </div>
-          <h1 className="text-2xl font-semibold text-slate-800 mb-1">Create account</h1>
-          <p className="text-slate-500 text-sm">Join the HR platform</p>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Create account</h1>
+          <p className="mt-0.5 text-xs text-slate-400">Join the HR platform</p>
         </div>
 
-        <form onSubmit={handleRegister} noValidate>
-          <div className="grid grid-cols-2 gap-3 mb-4">
+        <form onSubmit={handleRegister} noValidate className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                First Name
-              </label>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">First Name</p>
               <input
                 name="firstName"
                 type="text"
                 value={form.firstName}
                 onChange={handleChange}
                 placeholder="John"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Last Name
-              </label>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Last Name</p>
               <input
                 name="lastName"
                 type="text"
                 value={form.lastName}
                 onChange={handleChange}
                 placeholder="Doe"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
                 required
               />
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Username
-            </label>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Username</p>
             <input
               name="username"
               type="text"
               value={form.username}
               onChange={handleChange}
               placeholder="johndoe"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Email
-            </label>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Email</p>
             <input
               name="email"
               type="email"
               value={form.email}
               onChange={handleChange}
               placeholder="you@company.com"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Password
-            </label>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Password</p>
             <input
               name="password"
               type="password"
               value={form.password}
               onChange={handleChange}
               placeholder="Min. 6 characters"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Confirm password
-            </label>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Confirm Password</p>
             <input
               name="confirmPassword"
               type="password"
               value={form.confirmPassword}
               onChange={handleChange}
               placeholder="••••••"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
               required
             />
           </div>
 
           {error && (
-            <p className="text-red-500 text-xs mb-4">{error}</p>
+            <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2">
+              <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-xs text-red-600">{error}</p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-700 hover:bg-slate-800 disabled:opacity-60 text-white font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+            className="w-full inline-flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-950 disabled:opacity-60 text-white font-semibold text-xs tracking-wide py-2.5 rounded-lg transition-colors shadow-sm"
           >
             {loading ? (
               <>
@@ -219,14 +189,14 @@ export default function Register() {
         </form>
 
         <div className="flex items-center gap-3 my-5">
-          <hr className="flex-1 border-slate-200" />
-          <span className="text-xs text-slate-400">or continue with</span>
-          <hr className="flex-1 border-slate-200" />
+          <hr className="flex-1 border-slate-100" />
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">or</span>
+          <hr className="flex-1 border-slate-100" />
         </div>
 
         <button
           onClick={handleGoogleRegister}
-          className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+          className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs tracking-wide py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -237,9 +207,9 @@ export default function Register() {
           Register with Google
         </button>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-xs text-slate-400 mt-6">
           Already have an account?{' '}
-          <Link to="/login" className="text-slate-700 hover:underline font-medium">
+          <Link to="/login" className="text-blue-900 hover:underline font-semibold">
             Sign in
           </Link>
         </p>
