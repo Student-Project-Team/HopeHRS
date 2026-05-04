@@ -65,6 +65,17 @@ export function UserRightsProvider({ children }) {
       }
     };
 
+    fetchUserRights();
+  }, [user?.email, user?.user_type, authLoading]);
+
+  const hasRight = (rightCode) => {
+    const userType = user?.user_type;
+    // SUPERADMIN has all rights
+    if (userType === 'SUPERADMIN') {
+      return true;
+    }
+    // ADMIN only has non-delete rights (handled by the rights map)
+  }, [user]);
     if (!authLoading) {
       fetchUserType();
     }

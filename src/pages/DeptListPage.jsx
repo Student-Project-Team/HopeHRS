@@ -1,6 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
+import { getAllDepartments, createDepartment, updateDepartment } from '../services/departmentService';
+import AddDeptModal from '../components/AddDeptModal';
+import EditDeptModal from '../components/EditDeptModal';
+
+export default function DeptListPage() {
+  const { user } = useAuth();
+  const { canAddDepartment, canEditDepartment } = useRights();
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDept, setEditingDept] = useState(null);
+
+  const userType = user?.user_type || 'USER';
+  const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
 import { getAllDepartments, createDepartment, updateDepartment, softDeleteDepartment, recoverDepartment } from '../services/departmentService';
 import AddDeptModal from '../components/AddDeptModal';
 import EditDeptModal from '../components/EditDeptModal';
@@ -141,6 +157,10 @@ export default function DeptListPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Dept Code</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Department Name</th>
+                {isAdminPlus && (
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
+                )}
+                {canEditDepartment() && (
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                 {isAdminPlus && (
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stamp</th>
@@ -151,6 +171,9 @@ export default function DeptListPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
+              {departments.length === 0 ? (
+                <tr>
+                  <td colSpan={isAdminPlus ? 4 : 3} className="px-6 py-12 text-center text-slate-400 text-sm">
               {filteredDepartments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-400 text-sm">
@@ -158,6 +181,21 @@ export default function DeptListPage() {
                   </td>
                 </tr>
               ) : (
+                departments.map((dept) => (
+                  <tr key={dept.deptCode} className="hover:bg-slate-50 transition">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-700">{dept.deptCode}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{dept.deptName}</td>
+                    {isAdminPlus && (
+                      <td className="px-6 py-4 text-xs text-slate-500 max-w-[200px] truncate" title={dept.stamp}>
+                        {dept.stamp || '-'}
+                      </td>
+                    )}
+                    {canEditDepartment() && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {canEditDepartment() && dept.record_status === 'ACTIVE' && (
+                          <button
+                            onClick={() => { setEditingDept(dept); setShowEditModal(true); }}
+                            className="text-slate-600 hover:text-slate-800 text-sm font-medium transition"
                 filteredDepartments.map((dept) => (
                   <tr key={dept.deptCode} className="hover:bg-slate-50 transition">
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{dept.deptCode}</td>

@@ -18,6 +18,7 @@ import SoftDeleteConfirmDialog from '../components/SoftDeleteConfirmDialog';
 export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canAddEmployee, canEditEmployee, canDeleteEmployee, isAdminOrSuperAdmin } = useRights();
   const { canAddEmployee, canEditEmployee, canDeleteEmployee } = useRights();
   const { userType } = useUserRights(); // ← USE THIS instead of user?.user_type
 
@@ -27,6 +28,9 @@ export default function EmployeeListPage() {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEmployee, setEditEmployee] = useState(null);
@@ -284,6 +288,7 @@ export default function EmployeeListPage() {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
+        employee={deleteTarget}
         item={deleteTarget}
         itemType="employee"
         loading={deleteLoading}
