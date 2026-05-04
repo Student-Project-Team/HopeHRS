@@ -63,9 +63,11 @@ export default function Layout() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600"></div>
-        <p className="ml-2 text-slate-600">Loading...</p>
+      <div className="flex justify-center items-center h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+          <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+        </div>
       </div>
     );
   }
@@ -74,13 +76,18 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50">
+      {/* Navbar - minimal with shadow */}
       <Navbar user={user} onToggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar container with transition */}
         <Sidebar isOpen={sidebarOpen} activeNav={activeNav} onNavChange={setActiveNav} />
         
-        <main className="flex-1 overflow-y-auto p-6">
-          <Outlet />
+        {/* Main content area with clean background */}
+        <main className="flex-1 overflow-y-auto bg-slate-50">
+          <div className="p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
