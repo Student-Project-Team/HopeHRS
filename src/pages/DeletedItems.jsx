@@ -14,6 +14,15 @@ const TABS = [
   { id: 'departments', label: 'Departments' },
 ];
 
+// ─── Th helper ────────────────────────────────────────────────────────────────
+function Th({ children }) {
+  return (
+    <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+      {children}
+    </th>
+  );
+}
+
 // ─── Shared UI pieces ──────────────────────────────────────────────────────────
 function EmptyState({ label }) {
   return (
@@ -103,10 +112,10 @@ function Td({ children, className = '' }) {
 
 // ─── Tab: Deleted Employees ────────────────────────────────────────────────────
 function DeletedEmployees({ userEmail }) {
-  const [rows, setRows]           = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
-  const [recoveringId, setRecId]  = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [recoveringId, setRecId] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -176,9 +185,9 @@ function DeletedEmployees({ userEmail }) {
 
 // ─── Tab: Deleted Job History ─────────────────────────────────────────────────
 function DeletedJobHistory({ userEmail }) {
-  const [rows, setRows]            = useState([]);
-  const [loading, setLoading]      = useState(true);
-  const [error, setError]          = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringKey, setRecKey] = useState(null);
 
   const load = useCallback(async () => {
@@ -217,7 +226,7 @@ function DeletedJobHistory({ userEmail }) {
       const { error: dbErr } = await supabase
         .from('jobhistory')
         .update({ record_status: 'ACTIVE', stamp })
-        .eq('empno',   item.empno)
+        .eq('empno', item.empno)
         .eq('jobcode', item.jobcode)
         .eq('effdate', item.effdate);
       if (dbErr) throw dbErr;
@@ -267,9 +276,9 @@ function DeletedJobHistory({ userEmail }) {
 
 // ─── Tab: Deleted Jobs ────────────────────────────────────────────────────────
 function DeletedJobs({ userEmail }) {
-  const [rows, setRows]              = useState([]);
-  const [loading, setLoading]        = useState(true);
-  const [error, setError]            = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringCode, setRecCode] = useState(null);
 
   const load = useCallback(async () => {
@@ -337,9 +346,9 @@ function DeletedJobs({ userEmail }) {
 
 // ─── Tab: Deleted Departments ─────────────────────────────────────────────────
 function DeletedDepartments({ userEmail }) {
-  const [rows, setRows]              = useState([]);
-  const [loading, setLoading]        = useState(true);
-  const [error, setError]            = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recoveringCode, setRecCode] = useState(null);
 
   const load = useCallback(async () => {
@@ -407,12 +416,12 @@ function DeletedDepartments({ userEmail }) {
 
 // ─── Page root ────────────────────────────────────────────────────────────────
 export default function DeletedItems() {
-  const { user }        = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('employees');
 
-  const userType    = user?.user_type || 'USER';
+  const userType = user?.user_type || 'USER';
   const isAdminPlus = userType === 'ADMIN' || userType === 'SUPERADMIN';
-  const userEmail   = user?.email;
+  const userEmail = user?.email;
 
   if (!isAdminPlus) {
     return (
@@ -458,12 +467,20 @@ export default function DeletedItems() {
         ))}
       </div>
 
-      {/* Tab panels */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden w-full mt-4">
-        <div className={activeTab === 'employees'   ? '' : 'hidden'}><DeletedEmployees   userEmail={userEmail} /></div>
-        <div className={activeTab === 'jobhistory'  ? '' : 'hidden'}><DeletedJobHistory  userEmail={userEmail} /></div>
-        <div className={activeTab === 'jobs'        ? '' : 'hidden'}><DeletedJobs        userEmail={userEmail} /></div>
-        <div className={activeTab === 'departments' ? '' : 'hidden'}><DeletedDepartments userEmail={userEmail} /></div>
+      {/* Tab panels — rendered once, shown/hidden via CSS to preserve state */}
+      <div className="bg-white rounded-b-xl rounded-tr-xl shadow-sm border border-t-0 border-slate-200 overflow-hidden">
+        <div className={activeTab === 'employees' ? '' : 'hidden'}>
+          <DeletedEmployees userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobhistory' ? '' : 'hidden'}>
+          <DeletedJobHistory userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'jobs' ? '' : 'hidden'}>
+          <DeletedJobs userEmail={userEmail} />
+        </div>
+        <div className={activeTab === 'departments' ? '' : 'hidden'}>
+          <DeletedDepartments userEmail={userEmail} />
+        </div>
       </div>
     </div>
   );

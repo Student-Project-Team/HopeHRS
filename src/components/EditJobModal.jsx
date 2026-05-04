@@ -6,18 +6,23 @@ export default function EditJobModal({ isOpen, onClose, onSave, job }) {
 
   useEffect(() => {
     if (isOpen && job) {
-      setJobDesc(job.jobdesc || job.jobDesc || '');
+      // Handle both camelCase and lowercase property names
+      setJobDesc(job.jobDesc || job.jobdesc || '');
     }
   }, [isOpen, job]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!jobDesc.trim()) {
+      alert('Job description is required');
+      return;
+    }
     setLoading(true);
     try {
-      await onSave({ jobDesc });
+      await onSave({ jobDesc: jobDesc.trim() });
       onClose();
     } catch (err) {
-      alert(err.message);
+      alert(err.message || 'Failed to update job');
     } finally {
       setLoading(false);
     }

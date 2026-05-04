@@ -1,3 +1,7 @@
+// hooks/useRights.js
+import { useContext, useMemo } from 'react';
+import { UserRightsContext } from '../context/UserRightsContext';
+import { useAuth } from './useAuth';
 import { useUserRights } from '../context/UserRightsContext';
 
 export function useRights() {
@@ -59,30 +63,27 @@ export function useRights() {
     return rights?.JH_DEL === true;
   };
 
-  // ADD THIS - Admin Module rights
+  // FIXED: Admin Module rights - ADMIN and SUPERADMIN can manage users
   const canManageUsers = () => {
-    return userType === 'SUPERADMIN';  // Only SUPERADMIN can manage users
+    return userType === 'ADMIN' || userType === 'SUPERADMIN';  // ← CHANGED THIS LINE
   };
 
   return {
     // Job rights
-    canAddJob,
-    canEditJob,
-    canDeleteJob,
+    canViewJobs: () => isAdminOrSuperAdmin || hasRight('JOB_VIEW'),
+    canAddJob: () => (isAdminOrSuperAdmin || hasRight('JOB_ADD')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
+    canEditJob: () => (isAdminOrSuperAdmin || hasRight('JOB_EDIT')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
+    canDeleteJob: () => (isSuperAdmin || hasRight('JOB_DEL')) && (dbUserTypeValue === 'SUPERADMIN'),
+    
     // Department rights
-    canAddDepartment,
-    canEditDepartment,
-    canDeleteDepartment,
-    // Employee rights
-    canAddEmployee,
-    canEditEmployee,
-    canDeleteEmployee,
-    // Job History rights
-    canViewJobHistory,
-    canAddJobHistory,
-    canEditJobHistory,
-    canDeleteJobHistory,
+    canViewDepartments: () => isAdminOrSuperAdmin || hasRight('DEPT_VIEW'),
+    canAddDepartment: () => (isAdminOrSuperAdmin || hasRight('DEPT_ADD')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
+    canEditDepartment: () => (isAdminOrSuperAdmin || hasRight('DEPT_EDIT')) && (dbUserTypeValue === 'ADMIN' || dbUserTypeValue === 'SUPERADMIN'),
+    canDeleteDepartment: () => (isSuperAdmin || hasRight('DEPT_DEL')) && (dbUserTypeValue === 'SUPERADMIN'),
+    
     // Admin rights
-    canManageUsers,  // ← ADD THIS
-  };
+    canManageUsers: () => (isAdminOrSuperAdmin || hasRight('ADM_USER')) && (dbUserTypeValue === 'SUPERADMIN')
+  }), [hasRight, contextRights, userRights, isAdmin, isSuperAdmin, isAdminOrSuperAdmin, dbUserTypeValue]);
+
+  return returnValue;
 }

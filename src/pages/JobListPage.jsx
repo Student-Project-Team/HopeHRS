@@ -86,33 +86,36 @@ export default function JobListPage() {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-24">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
-        <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+          <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (error) return (
-    <div className="m-4 p-3.5 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5">
-      <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p className="text-sm text-red-600">Error: {error}</p>
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="m-4 p-3.5 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5">
+        <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-sm text-red-600">Error: {error}</p>
+      </div>
+    );
+  }
 
   const filters = [
-    { key: 'ACTIVE',   label: 'Active Only' },
+    { key: 'ACTIVE', label: 'Active Only' },
     { key: 'INACTIVE', label: 'Inactive Only' },
-    { key: 'ALL',      label: 'All Jobs' },
+    { key: 'ALL', label: 'All Jobs' },
   ];
 
   return (
     <div className="p-4 md:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
         <div>
           <h1 className="text-xl font-bold text-slate-800 tracking-tight">Jobs</h1>
@@ -133,7 +136,6 @@ export default function JobListPage() {
         )}
       </div>
 
-      {/* Filter Tabs */}
       {isAdminPlus && (
         <div className="flex gap-1 mb-4 bg-slate-100 p-1 rounded-lg w-fit">
           {filters.map(({ key, label }) => (
@@ -158,8 +160,7 @@ export default function JobListPage() {
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
               <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
             <p className="text-sm font-medium text-slate-500">No jobs found</p>
@@ -227,7 +228,10 @@ export default function JobListPage() {
                       <div className="flex items-center gap-2">
                         {canEditJob() && job.record_status === 'ACTIVE' && (
                           <button
-                            onClick={() => { setEditingJob(job); setShowEditModal(true); }}
+                            onClick={() => {
+                              setEditingJob(job);
+                              setShowEditModal(true);
+                            }}
                             className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors"
                           >
                             Edit
@@ -266,12 +270,17 @@ export default function JobListPage() {
         onSave={handleAdd}
         editingJob={null}
       />
+
       <EditJobModal
         isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setEditingJob(null); }}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingJob(null);
+        }}
         onSave={handleEdit}
         job={editingJob}
       />
+
       <SoftDeleteConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

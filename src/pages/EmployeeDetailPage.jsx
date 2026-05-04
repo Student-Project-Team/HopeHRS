@@ -3,7 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRights } from '../hooks/useRights';
 import { getEmployeeById } from '../services/employeeService';
-import { getJobHistoryByEmployee, softDeleteJobHistory, recoverJobHistory } from '../services/jobHistoryService';
+import { 
+  getJobHistoryByEmployee, 
+  softDeleteJobHistory, 
+  recoverJobHistory 
+} from '../services/jobHistoryService';
 import JobHistoryPanel from '../components/JobHistoryPanel';
 import AddJobHistoryForm from '../components/AddJobHistoryForm';
 import EditJobHistoryModal from '../components/EditJobHistoryModal';
@@ -32,6 +36,7 @@ export default function EmployeeDetailPage() {
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
+  // Fetch employee profile
   useEffect(() => {
     const fetchEmployee = async () => {
       if (!empno) return;
@@ -82,6 +87,7 @@ export default function EmployeeDetailPage() {
     }
   };
 
+  // Recover a soft-deleted job history record (ADMIN+)
   const handleRecoverJobHistory = async (item) => {
     if (!window.confirm('Are you sure you want to recover this job history record?')) return;
     try {
@@ -199,6 +205,7 @@ export default function EmployeeDetailPage() {
           </div>
         </div>
 
+        {/* Stamp - visible only for ADMIN/SUPERADMIN */}
         {isAdminPlus && employee.stamp && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Stamp</p>
@@ -258,6 +265,7 @@ export default function EmployeeDetailPage() {
         </div>
       )}
 
+      {/* Add Job History Modal */}
       <AddJobHistoryForm
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
@@ -268,6 +276,7 @@ export default function EmployeeDetailPage() {
         }}
       />
 
+      {/* Edit Job History Modal */}
       <EditJobHistoryModal
         isOpen={!!editItem}
         item={editItem}
