@@ -44,7 +44,7 @@ export default function SalaryReportPage() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
           <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
         </div>
       </div>
@@ -92,15 +92,15 @@ export default function SalaryReportPage() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto w-full">
-        <table className="w-full min-w-[800px]">
+        <table className="w-full min-w-[750px]">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Job Code</th>
-              <th className="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Job Description</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Min Salary</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Max Salary</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Avg Salary</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Assignments</th>
+              <th className="pl-6 pr-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Job Code</th>
+              <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Job Description</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Min Salary</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Max Salary</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Avg Salary</th>
+              <th className="px-3 py-2.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Assignments</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -120,24 +120,24 @@ export default function SalaryReportPage() {
             ) : (
               salaryData.map((job, idx) => (
                 <tr key={job.jobCode || idx} className="hover:bg-slate-50 transition-colors duration-100">
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="pl-6 pr-3 py-3 whitespace-nowrap">
                     <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                       {job.jobCode}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs font-medium text-slate-700">
+                  <td className="px-3 py-3 text-xs font-medium text-slate-700">
                     {job.jobDesc}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center text-green-600 font-medium whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center text-green-600 font-medium whitespace-nowrap">
                     {formatCurrency(job.minSalary)}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center text-red-500 font-medium whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center text-red-500 font-medium whitespace-nowrap">
                     {formatCurrency(job.maxSalary)}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center text-blue-600 font-semibold whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center text-blue-600 font-semibold whitespace-nowrap">
                     {formatCurrency(job.avgSalary)}
                   </td>
-                  <td className="px-4 py-3 text-xs text-center text-slate-600 font-semibold whitespace-nowrap">
+                  <td className="px-3 py-3 text-xs text-center text-slate-600 font-semibold whitespace-nowrap pr-8">
                     {job.totalAssignments || 0}
                   </td>
                 </tr>

@@ -109,23 +109,27 @@ export default function EmployeeListPage() {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-24">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-[3px] border-slate-200 border-t-slate-600 rounded-full animate-spin" />
-        <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-900 rounded-full animate-spin" />
+          <p className="text-[11px] font-medium text-slate-400 tracking-widest uppercase">Loading</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (error) return (
-    <div className="m-4 p-3.5 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5">
-      <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p className="text-sm text-red-600">Error: {error}</p>
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="m-4 p-3.5 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2.5">
+        <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-sm text-red-600">Error: {error}</p>
+      </div>
+    );
+  }
 
   const filters = [
     { key: 'ACTIVE', label: 'Active Only' },
@@ -135,13 +139,12 @@ export default function EmployeeListPage() {
 
   return (
     <div className="p-4 md:p-6">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
         <div>
           <h1 className="text-xl font-bold text-slate-800 tracking-tight">Employees</h1>
           <p className="mt-0.5 text-xs text-slate-400">
-            {filteredEmployees.length}{' '}
-            {filteredEmployees.length === 1 ? 'employee' : 'employees'} shown
+            {filteredEmployees.length} {filteredEmployees.length === 1 ? 'employee' : 'employees'} shown
           </p>
         </div>
         {canAddEmployee() && (
@@ -157,7 +160,7 @@ export default function EmployeeListPage() {
         )}
       </div>
 
-      {/* ── Filter Tabs ── */}
+      {/* Filter Tabs */}
       {isAdminPlus && (
         <div className="flex gap-1 mb-4 bg-slate-100 p-1 rounded-lg w-fit">
           {filters.map(({ key, label }) => (
@@ -176,12 +179,12 @@ export default function EmployeeListPage() {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto w-full">
         <table className="w-full min-w-[1000px]">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Emp No</th>
+              <th className="pl-6 pr-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Emp No</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Last Name</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">First Name</th>
               <th className="px-3 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Gen</th>
@@ -222,7 +225,7 @@ export default function EmployeeListPage() {
                       : 'hover:bg-slate-50'
                   }`}
                 >
-                  <td className="px-3 py-3 whitespace-nowrap">
+                  <td className="pl-6 pr-3 py-3 whitespace-nowrap">
                     <span className="text-[11px] font-bold font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
                       {emp.empno}
                     </span>
@@ -267,7 +270,7 @@ export default function EmployeeListPage() {
                       </span>
                     </td>
                   )}
-                  <td className="px-3 py-3 whitespace-nowrap">
+                  <td className="px-3 py-3 whitespace-nowrap pr-8">
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => navigate(`/employees/${emp.empno}`)}
@@ -275,7 +278,6 @@ export default function EmployeeListPage() {
                       >
                         History
                       </button>
-
                       {canEditEmployee() && emp.record_status === 'ACTIVE' && (
                         <button
                           onClick={() => setEditEmployee(emp)}
@@ -284,7 +286,6 @@ export default function EmployeeListPage() {
                           Edit
                         </button>
                       )}
-
                       {canDeleteEmployee() && isSuperAdmin && emp.record_status === 'ACTIVE' && (
                         <button
                           onClick={() => setDeleteTarget(emp)}
@@ -293,7 +294,6 @@ export default function EmployeeListPage() {
                           Delete
                         </button>
                       )}
-
                       {isAdminPlus && emp.record_status === 'INACTIVE' && (
                         <button
                           onClick={() => handleRecover(emp.empno)}
