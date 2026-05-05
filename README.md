@@ -46,8 +46,6 @@ HopeHRS is a comprehensive web-based Human Resource Management System designed t
 
 ## 📁 Project Structure
 
-## 📁 Project Structure
-
 ### Root Directory
 - `vercel.json` - Vercel deployment configuration
 - `vite.config.js` - Vite build configuration
